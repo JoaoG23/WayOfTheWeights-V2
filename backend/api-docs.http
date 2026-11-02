@@ -1,0 +1,150 @@
+@baseUrl = http://localhost:3000
+# A sessão é mantida pelo cookie httpOnly "jwt" gravado no login: o REST
+# Client (VS Code) guarda e reenvia o cookie sozinho, sem header Authorization.
+
+### Autocadastro (público): cria conta no plano BASICO e você vira o
+### administrador proprietário dela
+POST {{baseUrl}}/conta
+Content-Type: application/json
+
+{
+  "nome": "Administrador",
+  "email": "admin@wayoftheweights.com",
+  "senha": "SenhaForte123!"
+}
+
+### Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@wayoftheweights.com",
+  "senha": "SenhaForte123!"
+}
+
+### Logout (expira o cookie da sessão)
+POST {{baseUrl}}/auth/logout
+
+### Plano da conta (limites e usuários por perfil)
+GET {{baseUrl}}/conta/plano
+
+### Alterar plano (somente ADMINISTRADOR; downgrade bloqueado se exceder limites)
+PUT {{baseUrl}}/conta/plano
+Content-Type: application/json
+
+{
+  "plano": "BETA"
+}
+
+### Minha conta
+GET {{baseUrl}}/conta
+
+### Atualizar minha conta
+PUT {{baseUrl}}/conta
+Content-Type: application/json
+
+{
+  "nome": "João Aluno da Silva"
+}
+
+### ---------------------------------------------------------------------
+### Usuários da conta (somente ADMINISTRADOR)
+### ---------------------------------------------------------------------
+
+### Criar usuário (perfil: ADMINISTRADOR | TREINADOR | ALUNO, respeitando o plano)
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+  "nome": "Maria",
+  "email": "maria@wayoftheweights.com",
+  "senha": "SenhaForte123!",
+  "perfil": "ALUNO"
+}
+
+### Listar usuários (paginado)
+GET {{baseUrl}}/usuarios?numeroPagina=1&quantidadeItens=10
+
+### Buscar usuário
+GET {{baseUrl}}/usuarios/1
+
+### Atualizar usuário (perfil / ativo)
+PUT {{baseUrl}}/usuarios/2
+Content-Type: application/json
+
+{
+  "ativo": false
+}
+
+### Remover usuário
+DELETE {{baseUrl}}/usuarios/2
+
+### ---------------------------------------------------------------------
+### Treinos (aluno: os próprios; administrador e treinador: de qualquer usuário da conta)
+### ---------------------------------------------------------------------
+
+### Criar treino (administrador/treinador pode enviar "usuarioId" de um aluno da conta)
+POST {{baseUrl}}/treinos
+Content-Type: application/json
+
+{
+  "titulo": "Treino A - Peito e Tríceps",
+  "descricao": "Segunda e quinta"
+}
+
+### Listar treinos (administrador/treinador pode filtrar com ?usuarioId=)
+GET {{baseUrl}}/treinos
+
+### Buscar treino
+GET {{baseUrl}}/treinos/1
+
+### Atualizar treino
+PUT {{baseUrl}}/treinos/1
+Content-Type: application/json
+
+{
+  "titulo": "Treino A - Peito"
+}
+
+### Remover treino
+DELETE {{baseUrl}}/treinos/1
+
+### ---------------------------------------------------------------------
+### Exercícios de um treino
+### ---------------------------------------------------------------------
+
+### Criar exercício (grava o primeiro registro no histórico)
+POST {{baseUrl}}/treinos/1/exercicios
+Content-Type: application/json
+
+{
+  "nome": "Supino reto",
+  "cargaAtual": 40
+}
+
+### Listar exercícios do treino
+GET {{baseUrl}}/treinos/1/exercicios
+
+### Buscar exercício
+GET {{baseUrl}}/treinos/1/exercicios/1
+
+### Atualizar carga (grava no histórico quando a carga muda)
+PUT {{baseUrl}}/treinos/1/exercicios/1
+Content-Type: application/json
+
+{
+  "cargaAtual": 42.5
+}
+
+### Histórico de cargas do exercício
+GET {{baseUrl}}/treinos/1/exercicios/1/historico
+
+### Remover exercício
+DELETE {{baseUrl}}/treinos/1/exercicios/1
+
+### ---------------------------------------------------------------------
+### Estatísticas
+### ---------------------------------------------------------------------
+
+### Resumo da evolução de força por exercício (administrador/treinador: ?usuarioId=)
+GET {{baseUrl}}/estatisticas/resumo

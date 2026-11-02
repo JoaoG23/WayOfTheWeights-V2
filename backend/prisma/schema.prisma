@@ -1,0 +1,126 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum PerfilUsuario {
+  // Pode fazer tudo dentro da própria conta: gerencia usuários, plano e os
+  // treinos de qualquer usuário da conta.
+  ADMINISTRADOR
+  // Gerencia treinos, exercícios e estatísticas de qualquer usuário da
+  // própria conta, mas não gerencia usuários nem plano.
+  TREINADOR
+  // Gerencia apenas os próprios treinos, exercícios e estatísticas.
+  ALUNO
+}
+
+// Quantidade máxima de usuários por perfil em cada plano fica em
+// src/modules/contas/regras/limites-plano.ts.
+enum PlanoConta {
+  BASICO
+  BETA
+}
+
+// ---------------------------------------------------------------------------
+// Conta (assinante do SaaS) e plano
+// ---------------------------------------------------------------------------
+
+model Conta {
+  id           Int        @id @default(autoincrement())
+  plano        PlanoConta @default(BASICO)
+  criadoEm     DateTime   @default(now()) @map("criado_em")
+  atualizadoEm DateTime   @updatedAt @map("atualizado_em")
+
+  usuarios Usuario[]
+
+  @@map("contas")
+}
+
+// ---------------------------------------------------------------------------
+// Autenticação e acesso
+// ---------------------------------------------------------------------------
+
+model Usuario {
+  id           Int           @id @default(autoincrement())
+  contaId      Int           @map("conta_id")
+  // O usuário não existe fora da conta — some junto com ela.
+  conta        Conta         @relation(fields: [contaId], references: [id], onDelete: Cascade)
+  nome         String
+  // Único no sistema todo (não só na conta): o login é feito só por email.
+  email        String        @unique
+  senhaHash    String        @map("senha_hash")
+  perfil       PerfilUsuario @default(ALUNO)
+  ativo        Boolean       @default(true)
+  // Administrador que criou a conta (POST /conta). Não pode ser removido,
+  // desativado nem ter o perfil alterado (UsuariosService), para a conta
+  // nunca ficar sem administrador.
+  proprietario Boolean       @default(false)
+  criadoEm     DateTime      @default(now()) @map("criado_em")
+  atualizadoEm DateTime      @updatedAt @map("atualizado_em")
+
+  treinos Treino[]
+
+  @@index([contaId, perfil])
+  @@map("usuarios")
+}
+
+// ---------------------------------------------------------------------------
+// Treinos, exercícios e evolução de carga
+// ---------------------------------------------------------------------------
+
+model Treino {
+  id           Int      @id @default(autoincrement())
+  usuarioId    Int      @map("usuario_id")
+  // O treino não tem sentido sem o dono — some junto com ele.
+  usuario      Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  titulo       String
+  descricao    String?
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  exercicios Exercicio[]
+
+  @@index([usuarioId])
+  @@map("treinos")
+}
+
+model Exercicio {
+  id           Int      @id @default(autoincrement())
+  treinoId     Int      @map("treino_id")
+  treino       Treino   @relation(fields: [treinoId], references: [id], onDelete: Cascade)
+  nome         String
+  // Carga atual em kg. Cada valor novo também é gravado em HistoricoCarga,
+  // que é a fonte das estatísticas de evolução de força.
+  cargaAtual   Float    @map("carga_atual")
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  historicoCargas HistoricoCarga[]
+
+  @@index([treinoId])
+  @@map("exercicios")
+}
+
+// Registro imutável de cada carga assumida pelo exercício: um na criação e
+// um a cada alteração de carga (ExerciciosService).
+model HistoricoCarga {
+  id           Int       @id @default(autoincrement())
+  exercicioId  Int       @map("exercicio_id")
+  exercicio    Exercicio @relation(fields: [exercicioId], references: [id], onDelete: Cascade)
+  carga        Float
+  registradoEm DateTime  @default(now()) @map("registrado_em")
+
+  @@index([exercicioId, registradoEm])
+  @@map("historico_cargas")
+}
