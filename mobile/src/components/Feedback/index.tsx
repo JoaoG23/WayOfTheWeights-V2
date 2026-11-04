@@ -27,7 +27,6 @@ export const MensagemTela = ({
 const styles = StyleSheet.create({
   centro: {
     flex: 1,
-    backgroundColor: cores.fundo,
     justifyContent: "center",
     alignItems: "center",
     padding: 24,

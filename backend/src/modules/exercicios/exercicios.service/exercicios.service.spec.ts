@@ -20,11 +20,13 @@ describe('ExerciciosService', () => {
     email: 'aluno@teste.com',
   };
 
+  // Formato devolvido pelo repositório: carga vem do catálogo compartilhado.
   const exercicioBase = {
     id: 10,
     treinoId: 5,
     nome: 'Supino reto',
-    cargaAtual: 60,
+    cargaId: 60,
+    carga: { valor: 60 },
     criadoEm: new Date(),
     atualizadoEm: new Date(),
   };
@@ -32,9 +34,9 @@ describe('ExerciciosService', () => {
   beforeEach(async () => {
     exerciciosRepositories = {
       buscarPorId: jest.fn(),
-      criarComHistorico: jest.fn(),
-      atualizarNome: jest.fn(),
-      atualizarCargaComHistorico: jest.fn(),
+      criarComHistorico: jest.fn().mockResolvedValue(exercicioBase),
+      atualizarNome: jest.fn().mockResolvedValue(exercicioBase),
+      atualizarCargaComHistorico: jest.fn().mockResolvedValue(exercicioBase),
       remover: jest.fn(),
       listarHistoricoCargas: jest.fn(),
     };
@@ -58,11 +60,7 @@ describe('ExerciciosService', () => {
 
   describe('criar', () => {
     it('valida acesso ao treino e cria o exercício gravando histórico', async () => {
-      exerciciosRepositories.criarComHistorico!.mockResolvedValue(
-        exercicioBase as any,
-      );
-
-      await service.criar(usuarioAutenticado, 5, {
+      const resultado = await service.criar(usuarioAutenticado, 5, {
         nome: 'Supino reto',
         cargaAtual: 60,
       });
@@ -76,6 +74,29 @@ describe('ExerciciosService', () => {
         nome: 'Supino reto',
         cargaAtual: 60,
       });
+      // A resposta expõe a carga como número, não o registro do catálogo.
+      expect(resultado.cargaAtual).toBe(60);
+      expect(resultado).not.toHaveProperty('carga');
+    });
+  });
+
+  describe('listarHistoricoCargas', () => {
+    it('devolve cada registro com a carga em kg', async () => {
+      const registradoEm = new Date();
+      exerciciosRepositories.buscarPorId!.mockResolvedValue(
+        exercicioBase as any,
+      );
+      exerciciosRepositories.listarHistoricoCargas!.mockResolvedValue([
+        { id: 1, registradoEm, carga: { valor: 60 } },
+      ] as any);
+
+      const historico = await service.listarHistoricoCargas(
+        usuarioAutenticado,
+        5,
+        10,
+      );
+
+      expect(historico).toEqual([{ id: 1, carga: 60, registradoEm }]);
     });
   });
 
@@ -85,11 +106,11 @@ describe('ExerciciosService', () => {
         exercicioBase as any,
       );
 
-      await service.atualizar(usuarioAutenticado, 5, 10, { cargaAtual: 62.5 });
+      await service.atualizar(usuarioAutenticado, 5, 10, { cargaAtual: 62 });
 
       expect(
         exerciciosRepositories.atualizarCargaComHistorico,
-      ).toHaveBeenCalledWith(10, { nome: undefined, cargaAtual: 62.5 });
+      ).toHaveBeenCalledWith(10, { nome: undefined, cargaAtual: 62 });
       expect(exerciciosRepositories.atualizarNome).not.toHaveBeenCalled();
     });
 

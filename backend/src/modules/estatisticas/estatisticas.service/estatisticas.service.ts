@@ -25,11 +25,10 @@ export class EstatisticasService {
       );
 
     return exercicios.map((exercicio) => {
+      const cargaAtual = exercicio.carga.valor;
       const cargaInicial =
-        exercicio.historicoCargas[0]?.carga ?? exercicio.cargaAtual;
-      const evolucaoCarga = this.arredondar(
-        exercicio.cargaAtual - cargaInicial,
-      );
+        exercicio.historicoCargas[0]?.carga.valor ?? cargaAtual;
+      const evolucaoCarga = cargaAtual - cargaInicial;
 
       return {
         exercicioId: exercicio.id,
@@ -37,7 +36,7 @@ export class EstatisticasService {
         treinoId: exercicio.treino.id,
         tituloTreino: exercicio.treino.titulo,
         cargaInicial,
-        cargaAtual: exercicio.cargaAtual,
+        cargaAtual,
         evolucaoCarga,
         evolucaoPercentual:
           cargaInicial === 0

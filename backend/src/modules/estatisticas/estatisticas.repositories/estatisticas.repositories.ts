@@ -14,12 +14,12 @@ export class EstatisticasRepositories {
       select: {
         id: true,
         nome: true,
-        cargaAtual: true,
+        carga: { select: { valor: true } },
         treino: { select: { id: true, titulo: true } },
         historicoCargas: {
           orderBy: { registradoEm: 'asc' },
           take: 1,
-          select: { carga: true },
+          select: { carga: { select: { valor: true } } },
         },
         _count: { select: { historicoCargas: true } },
       },

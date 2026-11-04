@@ -9,6 +9,15 @@ import {
 import { TreinosService } from '../../treinos/treinos.service/treinos.service';
 import { PayloadJwt } from '../../auth/tipos/payload-jwt';
 
+type ExercicioComCarga = {
+  id: number;
+  treinoId: number;
+  nome: string;
+  carga: { valor: number };
+  criadoEm: Date;
+  atualizadoEm: Date;
+};
+
 @Injectable()
 export class ExerciciosService {
   constructor(
@@ -23,11 +32,13 @@ export class ExerciciosService {
   ): Promise<ExercicioRespostaDto> {
     await this.treinosService.buscarPorId(usuarioAutenticado, treinoId);
 
-    return this.exerciciosRepositories.criarComHistorico({
-      treinoId,
-      nome: dadosExercicio.nome,
-      cargaAtual: dadosExercicio.cargaAtual,
-    });
+    const exercicioCriado =
+      await this.exerciciosRepositories.criarComHistorico({
+        treinoId,
+        nome: dadosExercicio.nome,
+        cargaAtual: dadosExercicio.cargaAtual,
+      });
+    return this.paraResposta(exercicioCriado);
   }
 
   async listarPorTreino(
@@ -35,7 +46,9 @@ export class ExerciciosService {
     treinoId: number,
   ): Promise<ExercicioRespostaDto[]> {
     await this.treinosService.buscarPorId(usuarioAutenticado, treinoId);
-    return this.exerciciosRepositories.listarPorTreino(treinoId);
+    const exercicios =
+      await this.exerciciosRepositories.listarPorTreino(treinoId);
+    return exercicios.map((exercicio) => this.paraResposta(exercicio));
   }
 
   async buscarPorId(
@@ -43,7 +56,12 @@ export class ExerciciosService {
     treinoId: number,
     id: number,
   ): Promise<ExercicioRespostaDto> {
-    return this.validarExercicioExiste(usuarioAutenticado, treinoId, id);
+    const exercicio = await this.validarExercicioExiste(
+      usuarioAutenticado,
+      treinoId,
+      id,
+    );
+    return this.paraResposta(exercicio);
   }
 
   // Só grava histórico quando a carga realmente muda: renomear o exercício
@@ -62,15 +80,21 @@ export class ExerciciosService {
 
     const cargaAlterada =
       dadosExercicio.cargaAtual !== undefined &&
-      dadosExercicio.cargaAtual !== exercicio.cargaAtual;
+      dadosExercicio.cargaAtual !== exercicio.carga.valor;
     if (!cargaAlterada) {
-      return this.exerciciosRepositories.atualizarNome(id, dadosExercicio.nome);
+      const exercicioRenomeado = await this.exerciciosRepositories.atualizarNome(
+        id,
+        dadosExercicio.nome,
+      );
+      return this.paraResposta(exercicioRenomeado);
     }
 
-    return this.exerciciosRepositories.atualizarCargaComHistorico(id, {
-      nome: dadosExercicio.nome,
-      cargaAtual: dadosExercicio.cargaAtual,
-    });
+    const exercicioAtualizado =
+      await this.exerciciosRepositories.atualizarCargaComHistorico(id, {
+        nome: dadosExercicio.nome,
+        cargaAtual: dadosExercicio.cargaAtual,
+      });
+    return this.paraResposta(exercicioAtualizado);
   }
 
   async remover(
@@ -88,7 +112,13 @@ export class ExerciciosService {
     id: number,
   ): Promise<HistoricoCargaRespostaDto[]> {
     await this.validarExercicioExiste(usuarioAutenticado, treinoId, id);
-    return this.exerciciosRepositories.listarHistoricoCargas(id);
+    const historico =
+      await this.exerciciosRepositories.listarHistoricoCargas(id);
+    return historico.map((registro) => ({
+      id: registro.id,
+      carga: registro.carga.valor,
+      registradoEm: registro.registradoEm,
+    }));
   }
 
   private async validarExercicioExiste(
@@ -103,5 +133,18 @@ export class ExerciciosService {
       throw new NotFoundException('Exercício não encontrado neste treino');
     }
     return exercicio;
+  }
+
+  // Mantém o contrato da API: a carga sai como número (kg), não como o
+  // registro do catálogo.
+  private paraResposta(exercicio: ExercicioComCarga): ExercicioRespostaDto {
+    return {
+      id: exercicio.id,
+      treinoId: exercicio.treinoId,
+      nome: exercicio.nome,
+      cargaAtual: exercicio.carga.valor,
+      criadoEm: exercicio.criadoEm,
+      atualizadoEm: exercicio.atualizadoEm,
+    };
   }
 }

@@ -1,4 +1,4 @@
-import { ScrollView, ActivityIndicator, StyleSheet } from "react-native";
+import { View, ScrollView, ActivityIndicator, StyleSheet } from "react-native";
 import { useForm } from "react-hook-form";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,12 +8,13 @@ import { Title } from "../../../components/Title";
 import { Subtitle } from "../../../components/Subtitle";
 import { Input } from "../../../components/Input/Input";
 import { Button } from "../../../components/Button";
+import { DecoracaoFundo } from "../../../components/DecoracaoFundo";
 import { criarExercicio } from "../api";
 import { DadosNovoExercicio } from "../types/exerciciosTypes";
 import { invalidarConsultasExercicios } from "../invalidarConsultasExercicios";
 import {
   converterTextoEmCarga,
-  REGEX_CARGA,
+  REGRAS_CARGA,
 } from "../../../helpers/formatarCarga/formatarCarga";
 import { obterMensagemErro } from "../../../helpers/obterMensagemErro/obterMensagemErro";
 import { cores } from "../../../theme/cores";
@@ -53,43 +54,43 @@ export const AddExercise = () => {
   });
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.conteudo}
-      keyboardShouldPersistTaps="handled"
-    >
-      <Title title="Novo Exercício" />
-      <Subtitle title="A carga inicial é o primeiro ponto do seu histórico de evolução" />
-      <Input
-        name="nome"
-        control={control}
-        label="Nome do exercício"
-        placeholder="Ex.: Leg Press 45 graus"
-        required="O nome do exercício é obrigatório"
-        maxLength={70}
-      />
-      <Input
-        name="carga"
-        control={control}
-        label="Carga inicial (kg)"
-        placeholder="Ex.: 40"
-        keyboardType="decimal-pad"
-        required="Informe a carga inicial"
-        rules={{
-          pattern: { value: REGEX_CARGA, message: "Use um número, ex.: 42,5" },
-        }}
-      />
-      {isPending ? (
-        <ActivityIndicator size="large" color={cores.destaque} />
-      ) : (
-        <Button
-          title="Salvar"
-          onPress={handleSubmit((dadosExercicio) =>
-            salvarExercicio(dadosExercicio)
-          )}
+    <View style={styles.container}>
+      <DecoracaoFundo />
+      <ScrollView
+        contentContainerStyle={styles.conteudo}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Title title="Novo Exercício" />
+        <Subtitle title="A carga inicial é o primeiro ponto do seu histórico de evolução" />
+        <Input
+          name="nome"
+          control={control}
+          label="Nome do exercício"
+          placeholder="Ex.: Leg Press 45 graus"
+          required="O nome do exercício é obrigatório"
+          maxLength={70}
         />
-      )}
-    </ScrollView>
+        <Input
+          name="carga"
+          control={control}
+          label="Carga inicial (kg)"
+          placeholder="Ex.: 40"
+          keyboardType="number-pad"
+          required="Informe a carga inicial"
+          rules={REGRAS_CARGA}
+        />
+        {isPending ? (
+          <ActivityIndicator size="large" color={cores.destaque} />
+        ) : (
+          <Button
+            title="Salvar"
+            onPress={handleSubmit((dadosExercicio) =>
+              salvarExercicio(dadosExercicio)
+            )}
+          />
+        )}
+      </ScrollView>
+    </View>
   );
 };
 

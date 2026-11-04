@@ -17,6 +17,7 @@ import { Input } from "../../../components/Input/Input";
 import { Button } from "../../../components/Button";
 import { GraficoEvolucao } from "../../../components/GraficoEvolucao";
 import { Carregando, MensagemTela } from "../../../components/Feedback";
+import { DecoracaoFundo } from "../../../components/DecoracaoFundo";
 import {
   atualizarCargaExercicio,
   buscarExercicio,
@@ -26,7 +27,7 @@ import { invalidarConsultasExercicios } from "../invalidarConsultasExercicios";
 import {
   converterTextoEmCarga,
   formatarCarga,
-  REGEX_CARGA,
+  REGRAS_CARGA,
 } from "../../../helpers/formatarCarga/formatarCarga";
 import { obterMensagemErro } from "../../../helpers/obterMensagemErro/obterMensagemErro";
 import { cores } from "../../../theme/cores";
@@ -89,69 +90,69 @@ export const ExerciseDetail = () => {
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.conteudo}
-      keyboardShouldPersistTaps="handled"
-    >
-      <Text style={styles.titulo}>{exercicio.nome}</Text>
-
-      <View style={styles.cartaoCarga}>
-        <View>
-          <Text style={styles.rotuloCarga}>Sua Carga Atual</Text>
-          <Text style={styles.valorCarga}>
-            {formatarCarga(exercicio.cargaAtual)}
-          </Text>
-        </View>
-        <MaterialCommunityIcons
-          name="dumbbell"
-          size={56}
-          color={cores.textoEscuro}
-        />
-      </View>
-
-      <Card>
-        <Input
-          name="carga"
-          control={control}
-          label="Nova carga (kg)"
-          placeholder="Ex.: 42,5"
-          keyboardType="decimal-pad"
-          required="Informe a nova carga"
-          rules={{
-            pattern: { value: REGEX_CARGA, message: "Use um número, ex.: 42,5" },
-          }}
-        />
-        {isPending ? (
-          <ActivityIndicator size="large" color={cores.destaque} />
-        ) : (
-          <Button
-            title="Registrar carga"
-            onPress={handleSubmit((dadosNovaCarga) =>
-              registrarCarga(dadosNovaCarga)
-            )}
-          />
-        )}
-      </Card>
-
-      <Card>
-        <Text style={styles.tituloHistorico}>Histórico de Evolução</Text>
-        <GraficoEvolucao historico={historico} />
-      </Card>
-
-      <TouchableOpacity
-        style={styles.botaoRemover}
-        onPress={() =>
-          navigation.navigate("RemoveExercise", {
-            treinoId,
-            id,
-            nome: exercicio.nome,
-          })
-        }
+    <View style={styles.container}>
+      <DecoracaoFundo />
+      <ScrollView
+        contentContainerStyle={styles.conteudo}
+        keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.textoRemover}>Remover exercício</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <Text style={styles.titulo}>{exercicio.nome}</Text>
+
+        <View style={styles.cartaoCarga}>
+          <View>
+            <Text style={styles.rotuloCarga}>Sua Carga Atual</Text>
+            <Text style={styles.valorCarga}>
+              {formatarCarga(exercicio.cargaAtual)}
+            </Text>
+          </View>
+          <MaterialCommunityIcons
+            name="dumbbell"
+            size={56}
+            color={cores.textoEscuro}
+          />
+        </View>
+
+        <Card>
+          <Input
+            name="carga"
+            control={control}
+            label="Nova carga (kg)"
+            placeholder="Ex.: 42"
+            keyboardType="number-pad"
+            required="Informe a nova carga"
+            rules={REGRAS_CARGA}
+          />
+          {isPending ? (
+            <ActivityIndicator size="large" color={cores.destaque} />
+          ) : (
+            <Button
+              title="Registrar carga"
+              onPress={handleSubmit((dadosNovaCarga) =>
+                registrarCarga(dadosNovaCarga)
+              )}
+            />
+          )}
+        </Card>
+
+        <Card>
+          <Text style={styles.tituloHistorico}>Histórico de Evolução</Text>
+          <GraficoEvolucao historico={historico} />
+        </Card>
+
+        <TouchableOpacity
+          style={styles.botaoRemover}
+          onPress={() =>
+            navigation.navigate("RemoveExercise", {
+              treinoId,
+              id,
+              nome: exercicio.nome,
+            })
+          }
+        >
+          <Text style={styles.textoRemover}>Remover exercício</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
   );
 };
 

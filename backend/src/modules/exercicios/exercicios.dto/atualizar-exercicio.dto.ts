@@ -1,11 +1,16 @@
 import {
+  IsInt,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
+  Max,
   MaxLength,
   Min,
 } from 'class-validator';
+import {
+  CARGA_MAXIMA_KG,
+  CARGA_MINIMA_KG,
+} from '../../../shared/constantes/limites-carga';
 
 export class AtualizarExercicioDto {
   @IsOptional()
@@ -15,10 +20,12 @@ export class AtualizarExercicioDto {
   nome?: string;
 
   @IsOptional()
-  @IsNumber(
-    { maxDecimalPlaces: 2 },
-    { message: 'cargaAtual deve ser um número com até 2 casas decimais' },
-  )
-  @Min(0, { message: 'cargaAtual não pode ser negativa' })
+  @IsInt({ message: 'cargaAtual deve ser um número inteiro' })
+  @Min(CARGA_MINIMA_KG, {
+    message: `cargaAtual deve ser no mínimo ${CARGA_MINIMA_KG} kg`,
+  })
+  @Max(CARGA_MAXIMA_KG, {
+    message: `cargaAtual deve ser no máximo ${CARGA_MAXIMA_KG} kg`,
+  })
   cargaAtual?: number;
 }

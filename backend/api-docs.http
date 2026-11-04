@@ -128,12 +128,12 @@ GET {{baseUrl}}/treinos/1/exercicios
 ### Buscar exercício
 GET {{baseUrl}}/treinos/1/exercicios/1
 
-### Atualizar carga (grava no histórico quando a carga muda)
+### Atualizar carga (kg inteiro de 1 a 1500; grava no histórico quando muda)
 PUT {{baseUrl}}/treinos/1/exercicios/1
 Content-Type: application/json
 
 {
-  "cargaAtual": 42.5
+  "cargaAtual": 42
 }
 
 ### Histórico de cargas do exercício

@@ -22,11 +22,12 @@ export default async () => {
   process.env.JWT_SECRET = 'segredo-de-teste-e2e';
 
   console.log(`[Testcontainers] Conectado em ${databaseUrl}`);
-  console.log('[Testcontainers] Sincronizando schema do Prisma...');
+  console.log('[Testcontainers] Aplicando migrations do Prisma...');
 
-  // Roda o push do prisma para criar as tabelas no container efêmero
-  // Utiliza o DATABASE_URL recém exportado no env
-  execSync('npx prisma db push', { stdio: 'inherit' });
+  // Aplica as migrations reais (e não db push) porque elas também populam
+  // dados de referência, como o catálogo de cargas de 1 a 1500 kg.
+  // Utiliza o DATABASE_URL recém exportado no env.
+  execSync('npx prisma migrate deploy', { stdio: 'inherit' });
 
-  console.log('[Testcontainers] Schema sincronizado. Iniciando testes...');
+  console.log('[Testcontainers] Migrations aplicadas. Iniciando testes...');
 };

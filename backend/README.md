@@ -57,7 +57,8 @@ Administrador e treinador agem sobre outro usuário informando `usuarioId` (no c
 
 ## Regras de negócio
 
-- Cada exercício tem uma `cargaAtual` (kg). A criação do exercício e **cada alteração de carga** gravam um registro em `historico_cargas`.
+- As cargas vêm de um **catálogo compartilhado** por todas as contas (tabela `cargas`): kg **inteiros de 1 a 1500**, inseridos pela migration `cargas_compartilhadas`. A API recebe e devolve a carga como número (`cargaAtual`), e o vínculo com o catálogo é interno.
+- Cada exercício tem uma `cargaAtual`. A criação do exercício e **cada alteração de carga** gravam um registro em `historico_cargas`.
 - O resumo de estatísticas compara a primeira carga registrada com a atual (evolução em kg e %).
 
 ## Como rodar

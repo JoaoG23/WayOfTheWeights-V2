@@ -2,6 +2,7 @@ import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { Title } from "../Title";
 import { Subtitle } from "../Subtitle";
 import { Button } from "../Button";
+import { DecoracaoFundo } from "../DecoracaoFundo";
 import { cores } from "../../theme/cores";
 
 interface ConfirmarRemocaoProps {
@@ -20,6 +21,7 @@ export const ConfirmarRemocao = ({
   aoDesistir,
 }: ConfirmarRemocaoProps) => (
   <View style={styles.container}>
+    <DecoracaoFundo />
     <Title title={titulo} />
     <Subtitle title={mensagem} />
 

@@ -5,6 +5,7 @@ import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 
 import { ButtonFloating } from "../../../components/ButtonFloating";
+import { DecoracaoFundo } from "../../../components/DecoracaoFundo";
 import { Carregando, MensagemTela } from "../../../components/Feedback";
 import { ExerciseItem } from "../../Exercises/ExerciseItem";
 import { listarExerciciosDoTreino } from "../../Exercises/api";
@@ -66,6 +67,7 @@ export const TrainingDetail = () => {
 
   return (
     <View style={styles.container}>
+      <DecoracaoFundo />
       <View style={styles.cabecalho}>
         <View style={styles.textosCabecalho}>
           <Text style={styles.titulo}>{tituloTreino}</Text>

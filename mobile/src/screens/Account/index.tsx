@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card } from "../../components/Card";
 import { Button } from "../../components/Button";
 import { Carregando, MensagemTela } from "../../components/Feedback";
+import { DecoracaoFundo } from "../../components/DecoracaoFundo";
 import { PerfilUsuario, useAuth } from "../../contexts/AuthContext";
 import { buscarMinhaConta, buscarPlanoConta } from "./api";
 import { cores } from "../../theme/cores";
@@ -36,41 +37,44 @@ export const Account = () => {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.conteudo}>
-      <View style={styles.perfil}>
-        <View style={styles.avatar}>
-          <Ionicons name="person" size={44} color={cores.textoEscuro} />
+    <View style={styles.container}>
+      <DecoracaoFundo />
+      <ScrollView contentContainerStyle={styles.conteudo}>
+        <View style={styles.perfil}>
+          <View style={styles.avatar}>
+            <Ionicons name="person" size={44} color={cores.textoEscuro} />
+          </View>
+          <Text style={styles.nome}>{conta.nome}</Text>
+          <Text style={styles.email}>{conta.email}</Text>
+          <View style={styles.chipPerfil}>
+            <Text style={styles.textoChipPerfil}>
+              {conta.perfil}
+              {conta.proprietario ? " • PROPRIETÁRIO" : ""}
+            </Text>
+          </View>
         </View>
-        <Text style={styles.nome}>{conta.nome}</Text>
-        <Text style={styles.email}>{conta.email}</Text>
-        <View style={styles.chipPerfil}>
-          <Text style={styles.textoChipPerfil}>
-            {conta.perfil}
-            {conta.proprietario ? " • PROPRIETÁRIO" : ""}
-          </Text>
+
+        {plano && (
+          <Card>
+            <Text style={styles.tituloPlano}>
+              Plano {NOMES_PLANOS[plano.plano]}
+            </Text>
+            {(Object.keys(NOMES_PERFIS) as PerfilUsuario[]).map((perfil) => (
+              <View key={perfil} style={styles.linhaPlano}>
+                <Text style={styles.textoLinhaPlano}>{NOMES_PERFIS[perfil]}</Text>
+                <Text style={styles.valorLinhaPlano}>
+                  {plano.usuariosPorPerfil[perfil]} / {plano.limites[perfil]}
+                </Text>
+              </View>
+            ))}
+          </Card>
+        )}
+
+        <View style={styles.botaoSair}>
+          <Button title="Sair da conta" variant="danger" onPress={sair} />
         </View>
-      </View>
-
-      {plano && (
-        <Card>
-          <Text style={styles.tituloPlano}>
-            Plano {NOMES_PLANOS[plano.plano]}
-          </Text>
-          {(Object.keys(NOMES_PERFIS) as PerfilUsuario[]).map((perfil) => (
-            <View key={perfil} style={styles.linhaPlano}>
-              <Text style={styles.textoLinhaPlano}>{NOMES_PERFIS[perfil]}</Text>
-              <Text style={styles.valorLinhaPlano}>
-                {plano.usuariosPorPerfil[perfil]} / {plano.limites[perfil]}
-              </Text>
-            </View>
-          ))}
-        </Card>
-      )}
-
-      <View style={styles.botaoSair}>
-        <Button title="Sair da conta" variant="danger" onPress={sair} />
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 

@@ -95,14 +95,29 @@ model Treino {
   @@map("treinos")
 }
 
+// Catálogo de cargas em kg inteiros (1 a 1500), compartilhado por todas as
+// contas. Populado pela migration "cargas_compartilhadas"; a faixa fica em
+// src/shared/constantes/limites-carga.ts. Não pode ser removida enquanto
+// estiver em uso (onDelete Restrict).
+model Carga {
+  id    Int @id @default(autoincrement())
+  valor Int @unique
+
+  exercicios      Exercicio[]
+  historicoCargas HistoricoCarga[]
+
+  @@map("cargas")
+}
+
 model Exercicio {
   id           Int      @id @default(autoincrement())
   treinoId     Int      @map("treino_id")
   treino       Treino   @relation(fields: [treinoId], references: [id], onDelete: Cascade)
   nome         String
-  // Carga atual em kg. Cada valor novo também é gravado em HistoricoCarga,
-  // que é a fonte das estatísticas de evolução de força.
-  cargaAtual   Float    @map("carga_atual")
+  // Carga atual (catálogo compartilhado). Cada carga nova também é gravada
+  // em HistoricoCarga, que é a fonte das estatísticas de evolução de força.
+  cargaId      Int      @map("carga_id")
+  carga        Carga    @relation(fields: [cargaId], references: [id])
   criadoEm     DateTime @default(now()) @map("criado_em")
   atualizadoEm DateTime @updatedAt @map("atualizado_em")
 
@@ -118,7 +133,8 @@ model HistoricoCarga {
   id           Int       @id @default(autoincrement())
   exercicioId  Int       @map("exercicio_id")
   exercicio    Exercicio @relation(fields: [exercicioId], references: [id], onDelete: Cascade)
-  carga        Float
+  cargaId      Int       @map("carga_id")
+  carga        Carga     @relation(fields: [cargaId], references: [id])
   registradoEm DateTime  @default(now()) @map("registrado_em")
 
   @@index([exercicioId, registradoEm])

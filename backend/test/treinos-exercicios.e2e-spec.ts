@@ -167,6 +167,27 @@ describe('Treinos, exercícios e estatísticas (e2e)', () => {
       ]);
     });
 
+    it('deve recusar carga fracionada ou fora do catálogo de 1 a 1500 kg (falha)', async () => {
+      const { treinoId, exercicioId } =
+        await criarTreinoComExercicio(cookieAluno);
+      const rotaExercicio = `/treinos/${treinoId}/exercicios/${exercicioId}`;
+
+      for (const cargaInvalida of [42.5, 0, 1501]) {
+        const resposta = await request(app.getHttpServer())
+          .put(rotaExercicio)
+          .set('Cookie', cookieAluno)
+          .send({ cargaAtual: cargaInvalida });
+        expect(resposta.status).toBe(400);
+      }
+
+      const cargaMaxima = await request(app.getHttpServer())
+        .put(rotaExercicio)
+        .set('Cookie', cookieAluno)
+        .send({ cargaAtual: 1500 });
+      expect(cargaMaxima.status).toBe(200);
+      expect(cargaMaxima.body.cargaAtual).toBe(1500);
+    });
+
     it('deve calcular o resumo de evolução de força (sucesso)', async () => {
       const { treinoId, exercicioId } =
         await criarTreinoComExercicio(cookieAluno);

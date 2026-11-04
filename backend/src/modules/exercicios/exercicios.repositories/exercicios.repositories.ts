@@ -12,18 +12,29 @@ export type DadosAtualizarCargaExercicio = {
   cargaAtual: number;
 };
 
+// A carga vive no catálogo compartilhado (tabela cargas); aqui só se lê o
+// valor em kg.
+const INCLUIR_CARGA = { carga: { select: { valor: true } } } as const;
+
+// Vincula ao catálogo pelo valor em kg (único), sem consulta extra.
+const conectarCarga = (valorKg: number) => ({ connect: { valor: valorKg } });
+
 @Injectable()
 export class ExerciciosRepositories {
   constructor(private readonly prisma: PrismaService) {}
 
   async buscarPorId(id: number) {
-    return this.prisma.exercicio.findUnique({ where: { id } });
+    return this.prisma.exercicio.findUnique({
+      where: { id },
+      include: INCLUIR_CARGA,
+    });
   }
 
   async listarPorTreino(treinoId: number) {
     return this.prisma.exercicio.findMany({
       where: { treinoId },
       orderBy: { criadoEm: 'asc' },
+      include: INCLUIR_CARGA,
     });
   }
 
@@ -31,7 +42,7 @@ export class ExerciciosRepositories {
     return this.prisma.historicoCarga.findMany({
       where: { exercicioId },
       orderBy: { registradoEm: 'asc' },
-      select: { id: true, carga: true, registradoEm: true },
+      select: { id: true, registradoEm: true, ...INCLUIR_CARGA },
     });
   }
 
@@ -40,14 +51,23 @@ export class ExerciciosRepositories {
   async criarComHistorico(dados: DadosCriarExercicio) {
     return this.prisma.exercicio.create({
       data: {
-        ...dados,
-        historicoCargas: { create: { carga: dados.cargaAtual } },
+        nome: dados.nome,
+        treino: { connect: { id: dados.treinoId } },
+        carga: conectarCarga(dados.cargaAtual),
+        historicoCargas: {
+          create: { carga: conectarCarga(dados.cargaAtual) },
+        },
       },
+      include: INCLUIR_CARGA,
     });
   }
 
   async atualizarNome(id: number, nome?: string) {
-    return this.prisma.exercicio.update({ where: { id }, data: { nome } });
+    return this.prisma.exercicio.update({
+      where: { id },
+      data: { nome },
+      include: INCLUIR_CARGA,
+    });
   }
 
   async atualizarCargaComHistorico(
@@ -57,9 +77,13 @@ export class ExerciciosRepositories {
     return this.prisma.exercicio.update({
       where: { id },
       data: {
-        ...dados,
-        historicoCargas: { create: { carga: dados.cargaAtual } },
+        nome: dados.nome,
+        carga: conectarCarga(dados.cargaAtual),
+        historicoCargas: {
+          create: { carga: conectarCarga(dados.cargaAtual) },
+        },
       },
+      include: INCLUIR_CARGA,
     });
   }
 

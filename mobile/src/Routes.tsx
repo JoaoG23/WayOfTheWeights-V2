@@ -10,6 +10,7 @@ import {
   Theme,
 } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { View } from "react-native";
 
 import { useAuth } from "./contexts/AuthContext";
 import { AppHeader } from "./components/AppHeader";
@@ -125,7 +126,14 @@ const TabRoutes = () => {
 export const AppRoutes = () => {
   const { usuario, carregandoSessao } = useAuth();
 
-  if (carregandoSessao) return <Carregando />;
+  // Fora do NavigationContainer não há tema, então o fundo escuro é explícito.
+  if (carregandoSessao) {
+    return (
+      <View style={{ flex: 1, backgroundColor: cores.fundo }}>
+        <Carregando />
+      </View>
+    );
+  }
 
   return (
     <NavigationContainer theme={temaNavegacao}>
