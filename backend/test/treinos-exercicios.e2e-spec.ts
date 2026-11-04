@@ -212,6 +212,87 @@ describe('Treinos, exercícios e estatísticas (e2e)', () => {
     });
   });
 
+  describe('séries e repetições', () => {
+    it('deve criar, listar na ordem, atualizar e remover séries (sucesso)', async () => {
+      const { treinoId, exercicioId } =
+        await criarTreinoComExercicio(cookieAluno);
+      const rotaSeries = `/treinos/${treinoId}/exercicios/${exercicioId}/series`;
+
+      const primeira = await request(app.getHttpServer())
+        .post(rotaSeries)
+        .set('Cookie', cookieAluno)
+        .send({ repeticoes: 12 });
+      expect(primeira.status).toBe(201);
+      expect(primeira.body).toMatchObject({ exercicioId, repeticoes: 12 });
+      await request(app.getHttpServer())
+        .post(rotaSeries)
+        .set('Cookie', cookieAluno)
+        .send({ repeticoes: 10 });
+
+      const atualizada = await request(app.getHttpServer())
+        .put(`${rotaSeries}/${primeira.body.id}`)
+        .set('Cookie', cookieAluno)
+        .send({ repeticoes: 15 });
+      expect(atualizada.status).toBe(200);
+      expect(atualizada.body.repeticoes).toBe(15);
+
+      const lista = await request(app.getHttpServer())
+        .get(rotaSeries)
+        .set('Cookie', cookieAluno);
+      expect(lista.body.map((serie) => serie.repeticoes)).toEqual([15, 10]);
+
+      const remocao = await request(app.getHttpServer())
+        .delete(`${rotaSeries}/${primeira.body.id}`)
+        .set('Cookie', cookieAluno);
+      expect(remocao.status).toBe(204);
+    });
+
+    it('deve recusar repetições fora de 1 a 100 ou fracionadas (falha)', async () => {
+      const { treinoId, exercicioId } =
+        await criarTreinoComExercicio(cookieAluno);
+      const rotaSeries = `/treinos/${treinoId}/exercicios/${exercicioId}/series`;
+
+      for (const repeticoesInvalidas of [0, 101, 8.5]) {
+        const resposta = await request(app.getHttpServer())
+          .post(rotaSeries)
+          .set('Cookie', cookieAluno)
+          .send({ repeticoes: repeticoesInvalidas });
+        expect(resposta.status).toBe(400);
+      }
+    });
+
+    it('não deve permitir acessar séries de outra conta (falha)', async () => {
+      const { treinoId, exercicioId } =
+        await criarTreinoComExercicio(cookieAluno);
+      const outraConta = await criarContaEObterCookie(
+        app,
+        'admin-outra-conta@example.com',
+      );
+
+      const resposta = await request(app.getHttpServer())
+        .post(`/treinos/${treinoId}/exercicios/${exercicioId}/series`)
+        .set('Cookie', outraConta.cookie)
+        .send({ repeticoes: 12 });
+
+      expect(resposta.status).toBe(404);
+    });
+
+    it('deve remover as séries junto com o exercício (sucesso)', async () => {
+      const { treinoId, exercicioId } =
+        await criarTreinoComExercicio(cookieAluno);
+      await request(app.getHttpServer())
+        .post(`/treinos/${treinoId}/exercicios/${exercicioId}/series`)
+        .set('Cookie', cookieAluno)
+        .send({ repeticoes: 12 });
+
+      await request(app.getHttpServer())
+        .delete(`/treinos/${treinoId}/exercicios/${exercicioId}`)
+        .set('Cookie', cookieAluno);
+
+      expect(await prisma.serie.count()).toBe(0);
+    });
+  });
+
   describe('acesso por perfil e por conta', () => {
     it('treinador deve criar e listar treinos de um aluno da conta (sucesso)', async () => {
       const treinador = await criarUsuarioNaContaEObterCookie(

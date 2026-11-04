@@ -8,5 +8,6 @@ import { TreinosModule } from '../treinos/treinos.module';
   imports: [TreinosModule],
   controllers: [ExerciciosController],
   providers: [ExerciciosService, ExerciciosRepositories],
+  exports: [ExerciciosService],
 })
 export class ExerciciosModule {}

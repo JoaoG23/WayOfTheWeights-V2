@@ -1,23 +1,15 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Put,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Put } from '@nestjs/common';
 import { UsuariosService } from '../usuarios.service/usuarios.service';
 import { CriarContaDto } from '../usuarios.dto/criar-conta.dto';
 import { AtualizarContaDto } from '../usuarios.dto/atualizar-conta.dto';
-import { TrocarSenhaDto } from '../usuarios.dto/trocar-senha.dto';
 import { Public } from '../../auth/decorators/public.decorator';
 import { UsuarioAutenticado } from '../../auth/decorators/usuario-autenticado.decorator';
 import { PayloadJwt } from '../../auth/tipos/payload-jwt';
 
 // Autocadastro (público: cria a conta no plano BASICO com quem se cadastrou
 // como administrador proprietário), consulta e atualização dos dados do
-// próprio usuário. O plano da conta fica em /conta/plano (ContasController).
+// próprio usuário. O plano da conta fica em /conta/plano (ContasController) e
+// a recuperação de senha em /auth/recuperar-senha (RecuperacaoSenhaController).
 @Controller('conta')
 export class ContaController {
   constructor(private readonly usuariosService: UsuariosService) {}
@@ -45,19 +37,6 @@ export class ContaController {
       usuarioAutenticado.contaId,
       usuarioAutenticado.sub,
       dadosConta,
-    );
-  }
-
-  @Put('senha')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async trocarSenha(
-    @UsuarioAutenticado() usuarioAutenticado: PayloadJwt,
-    @Body() dadosSenha: TrocarSenhaDto,
-  ) {
-    await this.usuariosService.trocarSenha(
-      usuarioAutenticado.contaId,
-      usuarioAutenticado.sub,
-      dadosSenha,
     );
   }
 }

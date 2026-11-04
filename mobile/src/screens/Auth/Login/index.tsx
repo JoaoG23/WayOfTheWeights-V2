@@ -1,4 +1,9 @@
-import { Text, ActivityIndicator, StyleSheet } from "react-native";
+import {
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+} from "react-native";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigation } from "@react-navigation/native";
@@ -36,6 +41,9 @@ export const Login = () => {
     <AuthLayout
       rodape={
         <>
+          <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
+            <Text style={styles.link}>Esqueci minha senha</Text>
+          </TouchableOpacity>
           <Text style={styles.textoRodape}>Caso você não tenha conta</Text>
           <Button
             title="Registre-se"
@@ -78,6 +86,13 @@ export const Login = () => {
 };
 
 const styles = StyleSheet.create({
+  link: {
+    textAlign: "center",
+    color: cores.textoEscuro,
+    fontSize: 14,
+    fontWeight: "600",
+    textDecorationLine: "underline",
+  },
   textoRodape: {
     textAlign: "center",
     color: cores.textoEscuro,

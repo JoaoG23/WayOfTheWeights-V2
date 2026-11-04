@@ -69,10 +69,31 @@ model Usuario {
   criadoEm     DateTime      @default(now()) @map("criado_em")
   atualizadoEm DateTime      @updatedAt @map("atualizado_em")
 
-  treinos Treino[]
+  treinos                Treino[]
+  codigoRecuperacaoSenha CodigoRecuperacaoSenha?
 
   @@index([contaId, perfil])
   @@map("usuarios")
+}
+
+// Código de 6 dígitos enviado por email para redefinir a senha (fluxo
+// "esqueci minha senha"). Só o hash é guardado, nunca o código. Um único
+// código ativo por usuário: pedir outro substitui o anterior. É apagado ao
+// redefinir a senha; expiração e limite de tentativas ficam em
+// RecuperacaoSenhaService.
+model CodigoRecuperacaoSenha {
+  id         Int      @id @default(autoincrement())
+  usuarioId  Int      @unique @map("usuario_id")
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  codigoHash String   @map("codigo_hash")
+  expiraEm   DateTime @map("expira_em")
+  // Tentativas erradas de informar o código; trava o código ao atingir o
+  // limite, para impedir adivinhar os 6 dígitos.
+  tentativas Int      @default(0)
+  // Reiniciado a cada novo código; base do intervalo mínimo entre envios.
+  criadoEm   DateTime @default(now()) @map("criado_em")
+
+  @@map("codigos_recuperacao_senha")
 }
 
 // ---------------------------------------------------------------------------
@@ -122,9 +143,26 @@ model Exercicio {
   atualizadoEm DateTime @updatedAt @map("atualizado_em")
 
   historicoCargas HistoricoCarga[]
+  series          Serie[]
 
   @@index([treinoId])
   @@map("exercicios")
+}
+
+// Séries de um exercício, cada uma com a sua quantidade de repetições (ex.:
+// 12, 10 e 8). A numeração "Série 1, 2, 3" é a ordem de criação (id), sem
+// coluna de ordem. Faixa de repetições em
+// src/shared/constantes/limites-serie.ts.
+model Serie {
+  id           Int       @id @default(autoincrement())
+  exercicioId  Int       @map("exercicio_id")
+  exercicio    Exercicio @relation(fields: [exercicioId], references: [id], onDelete: Cascade)
+  repeticoes   Int
+  criadoEm     DateTime  @default(now()) @map("criado_em")
+  atualizadoEm DateTime  @updatedAt @map("atualizado_em")
+
+  @@index([exercicioId])
+  @@map("series")
 }
 
 // Registro imutável de cada carga assumida pelo exercício: um na criação e

@@ -1,8 +1,8 @@
 import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 // Dados que o próprio usuário pode alterar na sua conta (PUT /conta). A
-// senha muda só em PUT /conta/senha (exige a atual); perfil e status ativo só
-// pelo administrador (PUT /usuarios/:id).
+// senha muda só pela recuperação por email (/auth/recuperar-senha); perfil e
+// status ativo só pelo administrador (PUT /usuarios/:id).
 export class AtualizarContaDto {
   @IsOptional()
   @IsString({ message: 'Nome deve ser um texto' })

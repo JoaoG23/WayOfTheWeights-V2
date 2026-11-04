@@ -17,6 +17,8 @@ import { AppHeader } from "./components/AppHeader";
 import { Carregando } from "./components/Feedback";
 import { Login } from "./screens/Auth/Login";
 import { SignUp } from "./screens/Auth/SignUp";
+import { ForgotPassword } from "./screens/Auth/ForgotPassword";
+import { ResetPassword } from "./screens/Auth/ResetPassword";
 import { Home } from "./screens/Home";
 import {
   Trainings,
@@ -33,7 +35,6 @@ import {
 } from "./screens/Exercises";
 import { Weights } from "./screens/Weights";
 import { Account } from "./screens/Account";
-import { ChangePassword } from "./screens/Account/ChangePassword";
 import { Users, AddUser, RemoveUser } from "./screens/Users";
 import { cores } from "./theme/cores";
 
@@ -47,9 +48,10 @@ export type TTabDefinition = {
 export type TScreenDefinition = {
   Login: undefined;
   SignUp: undefined;
+  ForgotPassword: undefined;
+  ResetPassword: { email: string };
   Main: NavigatorScreenParams<TTabDefinition>;
   Account: undefined;
-  ChangePassword: undefined;
   Users: undefined;
   AddUser: undefined;
   RemoveUser: { id: number; nome: string };
@@ -159,7 +161,6 @@ export const AppRoutes = () => {
               options={{ headerShown: false }}
             />
             <Stack.Screen name="Account" component={Account} />
-            <Stack.Screen name="ChangePassword" component={ChangePassword} />
             <Stack.Screen name="Users" component={Users} />
             <Stack.Screen name="AddUser" component={AddUser} />
             <Stack.Screen name="RemoveUser" component={RemoveUser} />
@@ -181,6 +182,16 @@ export const AppRoutes = () => {
             <Stack.Screen
               name="SignUp"
               component={SignUp}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="ForgotPassword"
+              component={ForgotPassword}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="ResetPassword"
+              component={ResetPassword}
               options={{ headerShown: false }}
             />
           </>

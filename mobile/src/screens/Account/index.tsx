@@ -75,11 +75,6 @@ export const Account = () => {
               onPress={() => navigation.navigate("Users")}
             />
           )}
-          <Button
-            title="Trocar senha"
-            variant="neutral"
-            onPress={() => navigation.navigate("ChangePassword")}
-          />
           <Button title="Sair da conta" variant="danger" onPress={sair} />
         </View>
       </ScrollView>

@@ -25,6 +25,24 @@ Content-Type: application/json
 ### Logout (expira o cookie da sessão)
 POST {{baseUrl}}/auth/logout
 
+### Esqueci minha senha — 1) pede o código de 6 dígitos por email (resposta sempre 204)
+POST {{baseUrl}}/auth/recuperar-senha
+Content-Type: application/json
+
+{
+  "email": "admin@wayoftheweights.com"
+}
+
+### Esqueci minha senha — 2) informa o código recebido e a nova senha
+POST {{baseUrl}}/auth/redefinir-senha
+Content-Type: application/json
+
+{
+  "email": "admin@wayoftheweights.com",
+  "codigo": "123456",
+  "novaSenha": "NovaSenha123!"
+}
+
 ### Plano da conta (limites e usuários por perfil)
 GET {{baseUrl}}/conta/plano
 
@@ -45,15 +63,6 @@ Content-Type: application/json
 
 {
   "nome": "João Aluno da Silva"
-}
-
-### Trocar minha senha (exige a senha atual)
-PUT {{baseUrl}}/conta/senha
-Content-Type: application/json
-
-{
-  "senhaAtual": "SenhaForte123!",
-  "novaSenha": "NovaSenha123!"
 }
 
 ### ---------------------------------------------------------------------
@@ -150,6 +159,28 @@ GET {{baseUrl}}/treinos/1/exercicios/1/historico
 
 ### Remover exercício
 DELETE {{baseUrl}}/treinos/1/exercicios/1
+
+### Séries do exercício (repetições de 1 a 100; a numeração é a ordem de criação)
+POST {{baseUrl}}/treinos/1/exercicios/1/series
+Content-Type: application/json
+
+{
+  "repeticoes": 12
+}
+
+### Listar séries do exercício
+GET {{baseUrl}}/treinos/1/exercicios/1/series
+
+### Atualizar repetições de uma série
+PUT {{baseUrl}}/treinos/1/exercicios/1/series/1
+Content-Type: application/json
+
+{
+  "repeticoes": 10
+}
+
+### Remover série
+DELETE {{baseUrl}}/treinos/1/exercicios/1/series/1
 
 ### ---------------------------------------------------------------------
 ### Estatísticas
