@@ -19,6 +19,7 @@ import { GraficoEvolucao } from "../../../components/GraficoEvolucao";
 import { SeriesDoExercicio } from "../components/SeriesDoExercicio";
 import { Carregando, MensagemTela } from "../../../components/Feedback";
 import { DecoracaoFundo } from "../../../components/DecoracaoFundo";
+import { TelaComTeclado } from "../../../components/TelaComTeclado";
 import {
   atualizarCargaExercicio,
   buscarExercicio,
@@ -92,7 +93,7 @@ export const ExerciseDetail = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <TelaComTeclado>
       <DecoracaoFundo />
       <ScrollView
         contentContainerStyle={styles.conteudo}
@@ -161,12 +162,11 @@ export const ExerciseDetail = () => {
           <Text style={styles.textoRemover}>Remover exercício</Text>
         </TouchableOpacity>
       </ScrollView>
-    </View>
+    </TelaComTeclado>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: cores.fundo },
   conteudo: { padding: 16, paddingBottom: 32 },
   titulo: {
     fontSize: 22,

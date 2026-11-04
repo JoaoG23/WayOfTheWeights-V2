@@ -86,7 +86,7 @@ const TAB_ICONS: Record<
   keyof TTabDefinition,
   keyof typeof MaterialCommunityIcons.glyphMap
 > = {
-  Home: "home",
+  Home: "view-dashboard",
   Treinos: "arm-flex",
   Exercicios: "weight-lifter",
   Pesos: "arrow-expand",
@@ -110,6 +110,8 @@ const TabRoutes = () => {
       initialRouteName="Home"
       screenOptions={({ route }) => ({
         header: () => <AppHeader />,
+        // Troca de aba com fade suave.
+        animation: "fade",
         tabBarIcon: ({ color, size }) => (
           <MaterialCommunityIcons
             name={TAB_ICONS[route.name]}
@@ -126,14 +128,11 @@ const TabRoutes = () => {
         tabBarLabelStyle: { fontWeight: "600" },
       })}
     >
-      {/* Home não aparece na barra: é aberta pelo logo do header. */}
+      {/* A Home é o dashboard: aba na barra e também aberta pelo logo. */}
       <Tab.Screen
         name="Home"
         component={Home}
-        options={{
-          tabBarButton: () => null,
-          tabBarItemStyle: { display: "none" },
-        }}
+        options={{ title: "Dashboard" }}
       />
       <Tab.Screen name="Treinos" component={Trainings} />
       <Tab.Screen
@@ -166,6 +165,9 @@ export const AppRoutes = () => {
             <AppHeader aoVoltar={navigation.goBack} />
           ),
           contentStyle: { backgroundColor: cores.fundo },
+          // Transições mais suaves: deslize lateral longo e com easing nativo.
+          animation: "slide_from_right",
+          animationDuration: 350,
         }}
       >
         {usuario ? (

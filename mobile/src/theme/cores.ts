@@ -4,6 +4,8 @@ export const cores = {
   fundo: "#323240",
   cartao: "#4A4A5E",
   cartaoClaro: "#636573",
+  // Cartão com 70% de opacidade (#4A4A5E): deixa a anilha de fundo transparecer.
+  cartaoTranslucido: "rgba(74, 74, 94, 0.7)",
 
   // Destaques
   destaque: "#DCFC34",

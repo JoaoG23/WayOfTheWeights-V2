@@ -1,4 +1,4 @@
-import { View, ScrollView, ActivityIndicator, StyleSheet } from "react-native";
+import { ScrollView, ActivityIndicator, StyleSheet } from "react-native";
 import { useForm } from "react-hook-form";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,6 +9,7 @@ import { Subtitle } from "../../../components/Subtitle";
 import { Input } from "../../../components/Input/Input";
 import { Button } from "../../../components/Button";
 import { DecoracaoFundo } from "../../../components/DecoracaoFundo";
+import { TelaComTeclado } from "../../../components/TelaComTeclado";
 import { criarExercicio } from "../api";
 import { DadosNovoExercicio } from "../types/exerciciosTypes";
 import { invalidarConsultasExercicios } from "../invalidarConsultasExercicios";
@@ -54,7 +55,7 @@ export const AddExercise = () => {
   });
 
   return (
-    <View style={styles.container}>
+    <TelaComTeclado>
       <DecoracaoFundo />
       <ScrollView
         contentContainerStyle={styles.conteudo}
@@ -90,11 +91,10 @@ export const AddExercise = () => {
           />
         )}
       </ScrollView>
-    </View>
+    </TelaComTeclado>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: cores.fundo },
   conteudo: { padding: 16 },
 });

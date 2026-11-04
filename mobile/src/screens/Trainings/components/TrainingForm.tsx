@@ -1,4 +1,4 @@
-import { View, ScrollView, ActivityIndicator, StyleSheet } from "react-native";
+import { ScrollView, ActivityIndicator, StyleSheet } from "react-native";
 import { Control } from "react-hook-form";
 
 import { Title } from "../../../components/Title";
@@ -6,6 +6,7 @@ import { Subtitle } from "../../../components/Subtitle";
 import { Input } from "../../../components/Input/Input";
 import { Button } from "../../../components/Button";
 import { DecoracaoFundo } from "../../../components/DecoracaoFundo";
+import { TelaComTeclado } from "../../../components/TelaComTeclado";
 import { DadosTreino } from "../types/treinosTypes";
 import { cores } from "../../../theme/cores";
 
@@ -32,7 +33,7 @@ export const TrainingForm = ({
   placeholderNome = "Ex.: Treino A",
   placeholderDescricao = "Ex.: Treino de perna",
 }: TrainingFormProps) => (
-  <View style={styles.container}>
+  <TelaComTeclado>
     <DecoracaoFundo />
     <ScrollView
       contentContainerStyle={styles.conteudo}
@@ -60,10 +61,9 @@ export const TrainingForm = ({
         <Button title="Salvar" onPress={aoSalvar} />
       )}
     </ScrollView>
-  </View>
+  </TelaComTeclado>
 );
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: cores.fundo },
   conteudo: { padding: 16 },
 });

@@ -29,7 +29,7 @@ export const AppHeader = ({ aoVoltar }: AppHeaderProps) => {
     <View style={[styles.container, { paddingTop: insets.top + 8 }]}>
       <View style={styles.pill}>
         <TouchableOpacity
-          style={styles.botaoEsquerda}
+          style={styles.botaoLateral}
           onPress={aoVoltar ?? (() => navigation.navigate("Account"))}
         >
           <Ionicons
@@ -48,8 +48,8 @@ export const AppHeader = ({ aoVoltar }: AppHeaderProps) => {
           />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.botaoSair} onPress={confirmarSaida}>
-          <Ionicons name="log-out-outline" size={18} color={cores.textoEscuro} />
+        <TouchableOpacity style={styles.botaoLateral} onPress={confirmarSaida}>
+          <Ionicons name="log-out-outline" size={22} color={cores.texto} />
         </TouchableOpacity>
       </View>
     </View>
@@ -71,14 +71,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     height: 48,
   },
-  botaoEsquerda: { padding: 4 },
+  botaoLateral: { padding: 4 },
   logo: { width: 34, height: 34, borderRadius: 8 },
-  botaoSair: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: cores.texto,
-    alignItems: "center",
-    justifyContent: "center",
-  },
 });

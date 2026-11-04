@@ -5,7 +5,6 @@ import {
   Text,
   ScrollView,
   KeyboardAvoidingView,
-  Platform,
   StyleSheet,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
@@ -20,7 +19,7 @@ interface AuthLayoutProps {
 export const AuthLayout = ({ children, rodape }: AuthLayoutProps) => (
   <KeyboardAvoidingView
     style={styles.container}
-    behavior={Platform.OS === "ios" ? "padding" : undefined}
+    behavior="padding"
   >
     <StatusBar style="dark" />
     <ScrollView

@@ -17,6 +17,7 @@ import { Subtitle } from "../../../components/Subtitle";
 import { Input } from "../../../components/Input/Input";
 import { Button } from "../../../components/Button";
 import { DecoracaoFundo } from "../../../components/DecoracaoFundo";
+import { TelaComTeclado } from "../../../components/TelaComTeclado";
 import { Carregando, MensagemTela } from "../../../components/Feedback";
 import { NOME_PERFIL } from "../../../helpers/perfis/perfis";
 import { obterMensagemErro } from "../../../helpers/obterMensagemErro/obterMensagemErro";
@@ -73,7 +74,7 @@ export const AddUser = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <TelaComTeclado>
       <DecoracaoFundo />
       <ScrollView
         contentContainerStyle={styles.conteudo}
@@ -147,12 +148,11 @@ export const AddUser = () => {
           />
         )}
       </ScrollView>
-    </View>
+    </TelaComTeclado>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: cores.fundo },
   conteudo: { padding: 16 },
   rotulo: {
     fontSize: 14,

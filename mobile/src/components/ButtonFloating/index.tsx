@@ -1,14 +1,23 @@
 import { TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { cores } from "../../theme/cores";
 
 interface ButtonFloatingProps {
   onPress: () => void;
 }
 
+const MARGEM_INFERIOR = 40;
+
 export const ButtonFloating = ({ onPress }: ButtonFloatingProps) => {
+  // Sobe acima da barra de navegação nativa do celular (gestos/3 botões).
+  const insets = useSafeAreaInsets();
+
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}>
+    <TouchableOpacity
+      style={[styles.button, { bottom: MARGEM_INFERIOR + insets.bottom }]}
+      onPress={onPress}
+    >
       <Ionicons name="add" size={30} color={cores.textoEscuro} />
     </TouchableOpacity>
   );
@@ -19,7 +28,6 @@ const styles = StyleSheet.create({
     width: 58,
     height: 58,
     position: "absolute",
-    bottom: 24,
     right: 24,
     zIndex: 2,
     backgroundColor: cores.destaque,
