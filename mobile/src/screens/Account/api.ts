@@ -26,3 +26,18 @@ export const buscarPlanoConta = async (): Promise<PlanoConta> => {
   const response = await api.get<PlanoConta>("/conta/plano");
   return response.data;
 };
+
+export interface DadosTrocaSenha {
+  senhaAtual: string;
+  novaSenha: string;
+}
+
+export const trocarSenha = async (dadosSenha: DadosTrocaSenha) => {
+  await api.put("/conta/senha", dadosSenha);
+};
+
+// Perfis que ainda têm vaga no plano atual da conta.
+export const obterPerfisComVaga = (plano: PlanoConta): PerfilUsuario[] =>
+  (Object.keys(plano.limites) as PerfilUsuario[]).filter(
+    (perfil) => plano.usuariosPorPerfil[perfil] < plano.limites[perfil]
+  );

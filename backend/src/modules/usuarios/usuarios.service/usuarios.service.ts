@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -9,6 +10,7 @@ import { CriarUsuarioDto } from '../usuarios.dto/criar-usuario.dto';
 import { CriarContaDto } from '../usuarios.dto/criar-conta.dto';
 import { AtualizarUsuarioDto } from '../usuarios.dto/atualizar-usuario.dto';
 import { UsuarioRespostaDto } from '../usuarios.dto/usuario-resposta.dto';
+import { TrocarSenhaDto } from '../usuarios.dto/trocar-senha.dto';
 import { ContasService } from '../../contas/contas.service/contas.service';
 import { PerfilUsuario, PlanoConta } from '../../../generated/prisma/enums';
 
@@ -136,6 +138,29 @@ export class UsuariosService {
     });
 
     return this.paraResposta(usuarioAtualizado);
+  }
+
+  // 400 (e não 401) na senha atual errada: 401 encerraria a sessão no app.
+  async trocarSenha(
+    contaId: number,
+    id: number,
+    dadosSenha: TrocarSenhaDto,
+  ): Promise<void> {
+    const usuario = await this.validarUsuarioExiste(contaId, id);
+
+    const senhaAtualCorreta =
+      await this.criptografiaBcrypt.verificarSenhasCombinam(
+        dadosSenha.senhaAtual,
+        usuario.senhaHash,
+      );
+    if (!senhaAtualCorreta) {
+      throw new BadRequestException('Senha atual incorreta');
+    }
+
+    const senhaHash = await this.criptografiaBcrypt.criptografarSenha(
+      dadosSenha.novaSenha,
+    );
+    await this.usuariosRepositories.atualizar(id, { senhaHash });
   }
 
   async remover(contaId: number, id: number): Promise<void> {

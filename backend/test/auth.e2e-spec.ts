@@ -105,6 +105,48 @@ describe('AuthController (e2e)', () => {
     });
   });
 
+  describe('trocar senha', () => {
+    it('deve exigir a senha atual e permitir login só com a nova (sucesso)', async () => {
+      const { cookie } = await criarContaEObterCookie(app, 'senha@example.com');
+
+      const senhaAtualErrada = await request(app.getHttpServer())
+        .put('/conta/senha')
+        .set('Cookie', cookie)
+        .send({ senhaAtual: 'errada', novaSenha: 'NovaSenha123!' });
+      expect(senhaAtualErrada.status).toBe(400);
+
+      const troca = await request(app.getHttpServer())
+        .put('/conta/senha')
+        .set('Cookie', cookie)
+        .send({ senhaAtual: 'SenhaForte123!', novaSenha: 'NovaSenha123!' });
+      expect(troca.status).toBe(204);
+
+      const loginSenhaAntiga = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: 'senha@example.com', senha: 'SenhaForte123!' });
+      expect(loginSenhaAntiga.status).toBe(401);
+
+      const loginSenhaNova = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: 'senha@example.com', senha: 'NovaSenha123!' });
+      expect(loginSenhaNova.status).toBe(200);
+    });
+
+    it('PUT /conta não deve alterar a senha sem conferir a atual (falha)', async () => {
+      const { cookie } = await criarContaEObterCookie(app, 'senha@example.com');
+
+      await request(app.getHttpServer())
+        .put('/conta')
+        .set('Cookie', cookie)
+        .send({ senha: 'TentativaSemSenhaAtual' });
+
+      const login = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: 'senha@example.com', senha: 'SenhaForte123!' });
+      expect(login.status).toBe(200);
+    });
+  });
+
   describe('logout', () => {
     it('deve expirar o cookie da sessão (sucesso)', async () => {
       await criarContaEObterCookie(app, 'logout@example.com');

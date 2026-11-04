@@ -33,6 +33,8 @@ import {
 } from "./screens/Exercises";
 import { Weights } from "./screens/Weights";
 import { Account } from "./screens/Account";
+import { ChangePassword } from "./screens/Account/ChangePassword";
+import { Users, AddUser, RemoveUser } from "./screens/Users";
 import { cores } from "./theme/cores";
 
 export type TTabDefinition = {
@@ -47,6 +49,10 @@ export type TScreenDefinition = {
   SignUp: undefined;
   Main: NavigatorScreenParams<TTabDefinition>;
   Account: undefined;
+  ChangePassword: undefined;
+  Users: undefined;
+  AddUser: undefined;
+  RemoveUser: { id: number; nome: string };
   TrainingDetail: { id: number; titulo: string };
   AddTraining: undefined;
   EditTraining: { id: number };
@@ -153,6 +159,10 @@ export const AppRoutes = () => {
               options={{ headerShown: false }}
             />
             <Stack.Screen name="Account" component={Account} />
+            <Stack.Screen name="ChangePassword" component={ChangePassword} />
+            <Stack.Screen name="Users" component={Users} />
+            <Stack.Screen name="AddUser" component={AddUser} />
+            <Stack.Screen name="RemoveUser" component={RemoveUser} />
             <Stack.Screen name="TrainingDetail" component={TrainingDetail} />
             <Stack.Screen name="AddTraining" component={AddTraining} />
             <Stack.Screen name="EditTraining" component={EditTraining} />

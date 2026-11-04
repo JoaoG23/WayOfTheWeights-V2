@@ -47,6 +47,15 @@ Content-Type: application/json
   "nome": "João Aluno da Silva"
 }
 
+### Trocar minha senha (exige a senha atual)
+PUT {{baseUrl}}/conta/senha
+Content-Type: application/json
+
+{
+  "senhaAtual": "SenhaForte123!",
+  "novaSenha": "NovaSenha123!"
+}
+
 ### ---------------------------------------------------------------------
 ### Usuários da conta (somente ADMINISTRADOR)
 ### ---------------------------------------------------------------------

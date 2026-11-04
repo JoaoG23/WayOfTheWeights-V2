@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { UsuariosService } from './usuarios.service';
 import { UsuariosRepositories } from '../usuarios.repositories/usuarios.repositories';
@@ -45,6 +49,7 @@ describe('UsuariosService', () => {
 
     criptografiaBcrypt = {
       criptografarSenha: jest.fn().mockResolvedValue('hash-nova'),
+      verificarSenhasCombinam: jest.fn(),
     };
 
     contasService = {
@@ -258,6 +263,44 @@ describe('UsuariosService', () => {
           ativo: false,
         },
       );
+    });
+  });
+
+  describe('trocarSenha', () => {
+    it('grava o hash da nova senha quando a senha atual confere', async () => {
+      usuariosRepositories.buscarPorIdNaConta!.mockResolvedValue(
+        usuarioBase as any,
+      );
+      criptografiaBcrypt.verificarSenhasCombinam!.mockResolvedValue(true);
+
+      await service.trocarSenha(contaId, usuarioBase.id, {
+        senhaAtual: 'senha-atual',
+        novaSenha: 'senha-nova',
+      });
+
+      expect(criptografiaBcrypt.verificarSenhasCombinam).toHaveBeenCalledWith(
+        'senha-atual',
+        usuarioBase.senhaHash,
+      );
+      expect(usuariosRepositories.atualizar).toHaveBeenCalledWith(
+        usuarioBase.id,
+        { senhaHash: 'hash-nova' },
+      );
+    });
+
+    it('lança BadRequestException e não altera quando a senha atual está errada', async () => {
+      usuariosRepositories.buscarPorIdNaConta!.mockResolvedValue(
+        usuarioBase as any,
+      );
+      criptografiaBcrypt.verificarSenhasCombinam!.mockResolvedValue(false);
+
+      await expect(
+        service.trocarSenha(contaId, usuarioBase.id, {
+          senhaAtual: 'errada',
+          novaSenha: 'senha-nova',
+        }),
+      ).rejects.toThrow(BadRequestException);
+      expect(usuariosRepositories.atualizar).not.toHaveBeenCalled();
     });
   });
 

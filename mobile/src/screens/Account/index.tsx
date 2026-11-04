@@ -6,19 +6,17 @@ import { Card } from "../../components/Card";
 import { Button } from "../../components/Button";
 import { Carregando, MensagemTela } from "../../components/Feedback";
 import { DecoracaoFundo } from "../../components/DecoracaoFundo";
-import { PerfilUsuario, useAuth } from "../../contexts/AuthContext";
+import { useNavigation } from "@react-navigation/native";
+import { useAuth } from "../../contexts/AuthContext";
+import { NOME_PERFIL_PLURAL, PERFIS } from "../../helpers/perfis/perfis";
 import { buscarMinhaConta, buscarPlanoConta } from "./api";
 import { cores } from "../../theme/cores";
-
-const NOMES_PERFIS: Record<PerfilUsuario, string> = {
-  ADMINISTRADOR: "Administradores",
-  TREINADOR: "Treinadores",
-  ALUNO: "Alunos",
-};
+import type { TNavigationScreenProps } from "../../Routes";
 
 const NOMES_PLANOS = { BASICO: "Básico", BETA: "Beta" };
 
 export const Account = () => {
+  const navigation = useNavigation<TNavigationScreenProps>();
   const { sair } = useAuth();
 
   const {
@@ -59,9 +57,9 @@ export const Account = () => {
             <Text style={styles.tituloPlano}>
               Plano {NOMES_PLANOS[plano.plano]}
             </Text>
-            {(Object.keys(NOMES_PERFIS) as PerfilUsuario[]).map((perfil) => (
+            {PERFIS.map((perfil) => (
               <View key={perfil} style={styles.linhaPlano}>
-                <Text style={styles.textoLinhaPlano}>{NOMES_PERFIS[perfil]}</Text>
+                <Text style={styles.textoLinhaPlano}>{NOME_PERFIL_PLURAL[perfil]}</Text>
                 <Text style={styles.valorLinhaPlano}>
                   {plano.usuariosPorPerfil[perfil]} / {plano.limites[perfil]}
                 </Text>
@@ -70,7 +68,18 @@ export const Account = () => {
           </Card>
         )}
 
-        <View style={styles.botaoSair}>
+        <View style={styles.botoes}>
+          {conta.perfil === "ADMINISTRADOR" && (
+            <Button
+              title="Usuários da conta"
+              onPress={() => navigation.navigate("Users")}
+            />
+          )}
+          <Button
+            title="Trocar senha"
+            variant="neutral"
+            onPress={() => navigation.navigate("ChangePassword")}
+          />
           <Button title="Sair da conta" variant="danger" onPress={sair} />
         </View>
       </ScrollView>
@@ -114,5 +123,5 @@ const styles = StyleSheet.create({
   },
   textoLinhaPlano: { fontSize: 15, color: cores.texto },
   valorLinhaPlano: { fontSize: 15, fontWeight: "bold", color: cores.texto },
-  botaoSair: { marginTop: 16 },
+  botoes: { marginTop: 16, gap: 10 },
 });
