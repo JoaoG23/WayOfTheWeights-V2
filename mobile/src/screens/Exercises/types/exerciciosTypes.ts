@@ -1,6 +1,6 @@
 export interface Exercicio {
   id: number;
-  treinoId: number;
+  subtreinoId: number;
   nome: string;
   cargaAtual: number;
   repeticoesPorSerie: number[];

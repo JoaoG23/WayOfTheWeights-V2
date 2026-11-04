@@ -55,12 +55,21 @@ describe('Treinos, exercícios e estatísticas (e2e)', () => {
       .set('Cookie', cookie)
       .send({ titulo: 'Treino A' });
 
+    const subtreino = await request(app.getHttpServer())
+      .post(`/treinos/${treino.body.id}/subtreinos`)
+      .set('Cookie', cookie)
+      .send({ titulo: 'Peito' });
+
     const exercicio = await request(app.getHttpServer())
-      .post(`/treinos/${treino.body.id}/exercicios`)
+      .post(`/treinos/${treino.body.id}/subtreinos/${subtreino.body.id}/exercicios`)
       .set('Cookie', cookie)
       .send({ nome: 'Supino reto', cargaAtual: 40 });
 
-    return { treinoId: treino.body.id, exercicioId: exercicio.body.id };
+    return {
+      treinoId: treino.body.id,
+      subtreinoId: subtreino.body.id,
+      exercicioId: exercicio.body.id,
+    };
   }
 
   describe('conta e plano', () => {
@@ -144,9 +153,9 @@ describe('Treinos, exercícios e estatísticas (e2e)', () => {
 
   describe('evolução de carga', () => {
     it('deve gravar histórico na criação e a cada alteração de carga (sucesso)', async () => {
-      const { treinoId, exercicioId } =
+      const { treinoId, subtreinoId, exercicioId } =
         await criarTreinoComExercicio(cookieAluno);
-      const rotaExercicio = `/treinos/${treinoId}/exercicios/${exercicioId}`;
+      const rotaExercicio = `/treinos/${treinoId}/subtreinos/${subtreinoId}/exercicios/${exercicioId}`;
 
       await request(app.getHttpServer())
         .put(rotaExercicio)
@@ -168,9 +177,9 @@ describe('Treinos, exercícios e estatísticas (e2e)', () => {
     });
 
     it('deve recusar carga fracionada ou fora do catálogo de 1 a 1500 kg (falha)', async () => {
-      const { treinoId, exercicioId } =
+      const { treinoId, subtreinoId, exercicioId } =
         await criarTreinoComExercicio(cookieAluno);
-      const rotaExercicio = `/treinos/${treinoId}/exercicios/${exercicioId}`;
+      const rotaExercicio = `/treinos/${treinoId}/subtreinos/${subtreinoId}/exercicios/${exercicioId}`;
 
       for (const cargaInvalida of [42.5, 0, 1501]) {
         const resposta = await request(app.getHttpServer())
@@ -189,10 +198,10 @@ describe('Treinos, exercícios e estatísticas (e2e)', () => {
     });
 
     it('deve calcular o resumo de evolução de força (sucesso)', async () => {
-      const { treinoId, exercicioId } =
+      const { treinoId, subtreinoId, exercicioId } =
         await criarTreinoComExercicio(cookieAluno);
       await request(app.getHttpServer())
-        .put(`/treinos/${treinoId}/exercicios/${exercicioId}`)
+        .put(`/treinos/${treinoId}/subtreinos/${subtreinoId}/exercicios/${exercicioId}`)
         .set('Cookie', cookieAluno)
         .send({ cargaAtual: 50 });
 
@@ -212,11 +221,114 @@ describe('Treinos, exercícios e estatísticas (e2e)', () => {
     });
   });
 
+  describe('subtreinos', () => {
+    const criarTreino = async (cookie: string) =>
+      (
+        await request(app.getHttpServer())
+          .post('/treinos')
+          .set('Cookie', cookie)
+          .send({ titulo: 'Treino' })
+      ).body.id;
+    const criarSubtreino = (cookie: string, treinoId: number, titulo: string) =>
+      request(app.getHttpServer())
+        .post(`/treinos/${treinoId}/subtreinos`)
+        .set('Cookie', cookie)
+        .send({ titulo });
+
+    it('deve permitir no máximo 3 subtreinos por treino e liberar vaga ao remover (sucesso)', async () => {
+      const treinoId = await criarTreino(cookieAluno);
+      const criados = [];
+      for (const titulo of ['Peito', 'Costas', 'Pernas']) {
+        const resposta = await criarSubtreino(cookieAluno, treinoId, titulo);
+        expect(resposta.status).toBe(201);
+        criados.push(resposta.body);
+      }
+
+      const quarto = await criarSubtreino(cookieAluno, treinoId, 'Ombros');
+      expect(quarto.status).toBe(409);
+
+      const lista = await request(app.getHttpServer())
+        .get(`/treinos/${treinoId}/subtreinos`)
+        .set('Cookie', cookieAluno);
+      expect(lista.body.map((subtreino) => subtreino.titulo)).toEqual([
+        'Peito',
+        'Costas',
+        'Pernas',
+      ]);
+
+      const remocao = await request(app.getHttpServer())
+        .delete(`/treinos/${treinoId}/subtreinos/${criados[0].id}`)
+        .set('Cookie', cookieAluno);
+      expect(remocao.status).toBe(204);
+
+      const novoQuarto = await criarSubtreino(cookieAluno, treinoId, 'Ombros');
+      expect(novoQuarto.status).toBe(201);
+    });
+
+    it('não deve acessar subtreino por um treino que não é o dele (falha)', async () => {
+      const treinoA = await criarTreino(cookieAluno);
+      const treinoB = await criarTreino(cookieAluno);
+      const subtreinoDoA = (await criarSubtreino(cookieAluno, treinoA, 'Peito'))
+        .body.id;
+
+      const resposta = await request(app.getHttpServer())
+        .post(`/treinos/${treinoB}/subtreinos/${subtreinoDoA}/exercicios`)
+        .set('Cookie', cookieAluno)
+        .send({ nome: 'Supino reto', cargaAtual: 40 });
+
+      expect(resposta.status).toBe(404);
+    });
+
+    it('deve remover exercícios e séries junto com o subtreino (sucesso)', async () => {
+      const { treinoId, subtreinoId, exercicioId } =
+        await criarTreinoComExercicio(cookieAluno);
+      await request(app.getHttpServer())
+        .post(
+          `/treinos/${treinoId}/subtreinos/${subtreinoId}/exercicios/${exercicioId}/series`,
+        )
+        .set('Cookie', cookieAluno)
+        .send({ repeticoes: 12 });
+
+      await request(app.getHttpServer())
+        .delete(`/treinos/${treinoId}/subtreinos/${subtreinoId}`)
+        .set('Cookie', cookieAluno);
+
+      expect(await prisma.exercicio.count()).toBe(0);
+      expect(await prisma.serie.count()).toBe(0);
+    });
+
+    it('não deve criar subtreino em treino de outra conta (falha)', async () => {
+      const treinoId = await criarTreino(cookieAluno);
+      const outraConta = await criarContaEObterCookie(
+        app,
+        'admin-outra-conta@example.com',
+      );
+
+      const resposta = await criarSubtreino(outraConta.cookie, treinoId, 'Invasão');
+
+      expect(resposta.status).toBe(404);
+    });
+
+    it('deve informar treino e subtreino no resumo de evolução (sucesso)', async () => {
+      const { subtreinoId } = await criarTreinoComExercicio(cookieAluno);
+
+      const resposta = await request(app.getHttpServer())
+        .get('/estatisticas/resumo')
+        .set('Cookie', cookieAluno);
+
+      expect(resposta.body[0]).toMatchObject({
+        tituloTreino: 'Treino A',
+        subtreinoId,
+        tituloSubtreino: 'Peito',
+      });
+    });
+  });
+
   describe('séries e repetições', () => {
     it('deve criar, listar na ordem, atualizar e remover séries (sucesso)', async () => {
-      const { treinoId, exercicioId } =
+      const { treinoId, subtreinoId, exercicioId } =
         await criarTreinoComExercicio(cookieAluno);
-      const rotaSeries = `/treinos/${treinoId}/exercicios/${exercicioId}/series`;
+      const rotaSeries = `/treinos/${treinoId}/subtreinos/${subtreinoId}/exercicios/${exercicioId}/series`;
 
       const primeira = await request(app.getHttpServer())
         .post(rotaSeries)
@@ -248,9 +360,9 @@ describe('Treinos, exercícios e estatísticas (e2e)', () => {
     });
 
     it('deve recusar repetições fora de 1 a 100 ou fracionadas (falha)', async () => {
-      const { treinoId, exercicioId } =
+      const { treinoId, subtreinoId, exercicioId } =
         await criarTreinoComExercicio(cookieAluno);
-      const rotaSeries = `/treinos/${treinoId}/exercicios/${exercicioId}/series`;
+      const rotaSeries = `/treinos/${treinoId}/subtreinos/${subtreinoId}/exercicios/${exercicioId}/series`;
 
       for (const repeticoesInvalidas of [0, 101, 8.5]) {
         const resposta = await request(app.getHttpServer())
@@ -262,7 +374,7 @@ describe('Treinos, exercícios e estatísticas (e2e)', () => {
     });
 
     it('não deve permitir acessar séries de outra conta (falha)', async () => {
-      const { treinoId, exercicioId } =
+      const { treinoId, subtreinoId, exercicioId } =
         await criarTreinoComExercicio(cookieAluno);
       const outraConta = await criarContaEObterCookie(
         app,
@@ -270,7 +382,7 @@ describe('Treinos, exercícios e estatísticas (e2e)', () => {
       );
 
       const resposta = await request(app.getHttpServer())
-        .post(`/treinos/${treinoId}/exercicios/${exercicioId}/series`)
+        .post(`/treinos/${treinoId}/subtreinos/${subtreinoId}/exercicios/${exercicioId}/series`)
         .set('Cookie', outraConta.cookie)
         .send({ repeticoes: 12 });
 
@@ -278,15 +390,15 @@ describe('Treinos, exercícios e estatísticas (e2e)', () => {
     });
 
     it('deve remover as séries junto com o exercício (sucesso)', async () => {
-      const { treinoId, exercicioId } =
+      const { treinoId, subtreinoId, exercicioId } =
         await criarTreinoComExercicio(cookieAluno);
       await request(app.getHttpServer())
-        .post(`/treinos/${treinoId}/exercicios/${exercicioId}/series`)
+        .post(`/treinos/${treinoId}/subtreinos/${subtreinoId}/exercicios/${exercicioId}/series`)
         .set('Cookie', cookieAluno)
         .send({ repeticoes: 12 });
 
       await request(app.getHttpServer())
-        .delete(`/treinos/${treinoId}/exercicios/${exercicioId}`)
+        .delete(`/treinos/${treinoId}/subtreinos/${subtreinoId}/exercicios/${exercicioId}`)
         .set('Cookie', cookieAluno);
 
       expect(await prisma.serie.count()).toBe(0);

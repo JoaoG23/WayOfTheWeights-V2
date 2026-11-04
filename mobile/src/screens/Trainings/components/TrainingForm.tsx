@@ -15,15 +15,22 @@ interface TrainingFormProps {
   control: Control<DadosTreino>;
   salvando: boolean;
   aoSalvar: () => void;
+  // Textos do campo de nome, para o mesmo formulário servir a treino e subtreino.
+  rotuloNome?: string;
+  placeholderNome?: string;
+  placeholderDescricao?: string;
 }
 
-// Formulário compartilhado entre criar e editar treino.
+// Formulário compartilhado entre criar/editar treino e criar/editar subtreino.
 export const TrainingForm = ({
   titulo,
   subtitulo,
   control,
   salvando,
   aoSalvar,
+  rotuloNome = "Nome do treino",
+  placeholderNome = "Ex.: Treino A",
+  placeholderDescricao = "Ex.: Treino de perna",
 }: TrainingFormProps) => (
   <View style={styles.container}>
     <DecoracaoFundo />
@@ -36,16 +43,16 @@ export const TrainingForm = ({
       <Input
         name="titulo"
         control={control}
-        label="Nome do treino"
-        placeholder="Ex.: Treino A"
-        required="O nome do treino é obrigatório"
+        label={rotuloNome}
+        placeholder={placeholderNome}
+        required="O nome é obrigatório"
         maxLength={70}
       />
       <Input
         name="descricao"
         control={control}
         label="Descrição"
-        placeholder="Ex.: Treino de perna"
+        placeholder={placeholderDescricao}
       />
       {salvando ? (
         <ActivityIndicator size="large" color={cores.destaque} />

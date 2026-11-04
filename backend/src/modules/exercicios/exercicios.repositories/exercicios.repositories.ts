@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 
 export type DadosCriarExercicio = {
-  treinoId: number;
+  subtreinoId: number;
   nome: string;
   cargaAtual: number;
 };
@@ -37,9 +37,9 @@ export class ExerciciosRepositories {
     });
   }
 
-  async listarPorTreino(treinoId: number) {
+  async listarPorSubtreino(subtreinoId: number) {
     return this.prisma.exercicio.findMany({
-      where: { treinoId },
+      where: { subtreinoId },
       orderBy: { criadoEm: 'asc' },
       include: INCLUIR_EXERCICIO,
     });
@@ -59,7 +59,7 @@ export class ExerciciosRepositories {
     return this.prisma.exercicio.create({
       data: {
         nome: dados.nome,
-        treino: { connect: { id: dados.treinoId } },
+        subtreino: { connect: { id: dados.subtreinoId } },
         carga: conectarCarga(dados.cargaAtual),
         historicoCargas: {
           create: { carga: conectarCarga(dados.cargaAtual) },

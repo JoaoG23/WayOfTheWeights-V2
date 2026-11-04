@@ -22,7 +22,7 @@ import type { TNavigationScreenProps, TScreenDefinition } from "../../../Routes"
 
 export const AddExercise = () => {
   const navigation = useNavigation<TNavigationScreenProps>();
-  const { treinoId } =
+  const { treinoId, subtreinoId } =
     useRoute<RouteProp<TScreenDefinition, "AddExercise">>().params;
   const queryClient = useQueryClient();
   const { control, handleSubmit } = useForm<DadosNovoExercicio>({
@@ -31,7 +31,7 @@ export const AddExercise = () => {
 
   const { mutate: salvarExercicio, isPending } = useMutation({
     mutationFn: (dadosExercicio: DadosNovoExercicio) =>
-      criarExercicio(treinoId, {
+      criarExercicio(treinoId, subtreinoId, {
         nome: dadosExercicio.nome,
         cargaAtual: converterTextoEmCarga(dadosExercicio.carga),
       }),

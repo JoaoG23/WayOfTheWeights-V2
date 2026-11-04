@@ -9,13 +9,19 @@ export class EstatisticasRepositories {
   // evitando carregar o histórico inteiro de cada exercício.
   async listarExerciciosComCargaInicial(contaId: number, usuarioId: number) {
     return this.prisma.exercicio.findMany({
-      where: { treino: { usuarioId, usuario: { contaId } } },
-      orderBy: [{ treinoId: 'asc' }, { criadoEm: 'asc' }],
+      where: { subtreino: { treino: { usuarioId, usuario: { contaId } } } },
+      orderBy: [{ subtreinoId: 'asc' }, { criadoEm: 'asc' }],
       select: {
         id: true,
         nome: true,
         carga: { select: { valor: true } },
-        treino: { select: { id: true, titulo: true } },
+        subtreino: {
+          select: {
+            id: true,
+            titulo: true,
+            treino: { select: { id: true, titulo: true } },
+          },
+        },
         historicoCargas: {
           orderBy: { registradoEm: 'asc' },
           take: 1,

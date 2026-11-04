@@ -16,12 +16,14 @@ export class SeriesService {
   async criar(
     usuarioAutenticado: PayloadJwt,
     treinoId: number,
+    subtreinoId: number,
     exercicioId: number,
     dadosSerie: CriarSerieDto,
   ): Promise<SerieRespostaDto> {
     await this.exerciciosService.buscarPorId(
       usuarioAutenticado,
       treinoId,
+      subtreinoId,
       exercicioId,
     );
 
@@ -34,11 +36,13 @@ export class SeriesService {
   async listarPorExercicio(
     usuarioAutenticado: PayloadJwt,
     treinoId: number,
+    subtreinoId: number,
     exercicioId: number,
   ): Promise<SerieRespostaDto[]> {
     await this.exerciciosService.buscarPorId(
       usuarioAutenticado,
       treinoId,
+      subtreinoId,
       exercicioId,
     );
     return this.seriesRepositories.listarPorExercicio(exercicioId);
@@ -47,11 +51,18 @@ export class SeriesService {
   async atualizar(
     usuarioAutenticado: PayloadJwt,
     treinoId: number,
+    subtreinoId: number,
     exercicioId: number,
     id: number,
     dadosSerie: AtualizarSerieDto,
   ): Promise<SerieRespostaDto> {
-    await this.validarSerieExiste(usuarioAutenticado, treinoId, exercicioId, id);
+    await this.validarSerieExiste(
+      usuarioAutenticado,
+      treinoId,
+      subtreinoId,
+      exercicioId,
+      id,
+    );
     return this.seriesRepositories.atualizarRepeticoes(
       id,
       dadosSerie.repeticoes,
@@ -61,10 +72,17 @@ export class SeriesService {
   async remover(
     usuarioAutenticado: PayloadJwt,
     treinoId: number,
+    subtreinoId: number,
     exercicioId: number,
     id: number,
   ): Promise<void> {
-    await this.validarSerieExiste(usuarioAutenticado, treinoId, exercicioId, id);
+    await this.validarSerieExiste(
+      usuarioAutenticado,
+      treinoId,
+      subtreinoId,
+      exercicioId,
+      id,
+    );
     await this.seriesRepositories.remover(id);
   }
 
@@ -73,12 +91,14 @@ export class SeriesService {
   private async validarSerieExiste(
     usuarioAutenticado: PayloadJwt,
     treinoId: number,
+    subtreinoId: number,
     exercicioId: number,
     id: number,
   ) {
     await this.exerciciosService.buscarPorId(
       usuarioAutenticado,
       treinoId,
+      subtreinoId,
       exercicioId,
     );
 

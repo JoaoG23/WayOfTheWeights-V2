@@ -11,10 +11,11 @@ import type { TNavigationScreenProps } from "../../../Routes";
 
 interface ExerciseItemProps {
   treinoId: number;
+  subtreinoId: number;
   exercicioId: number;
   nome: string;
   cargaAtual: number;
-  // Nome do treino, exibido na lista geral de exercícios.
+  // Treino e subtreino, exibidos na lista geral de exercícios.
   subtitulo?: string;
   // Repetições de cada série; quando informado, mostra o resumo das séries.
   repeticoesPorSerie?: number[];
@@ -23,6 +24,7 @@ interface ExerciseItemProps {
 export const ExerciseItem = React.memo(
   ({
     treinoId,
+    subtreinoId,
     exercicioId,
     nome,
     cargaAtual,
@@ -35,7 +37,11 @@ export const ExerciseItem = React.memo(
       <Card
         style={styles.card}
         onPress={() =>
-          navigation.navigate("ExerciseDetail", { treinoId, id: exercicioId })
+          navigation.navigate("ExerciseDetail", {
+            treinoId,
+            subtreinoId,
+            id: exercicioId,
+          })
         }
       >
         <View style={styles.info}>

@@ -51,13 +51,16 @@ export const Weights = () => {
         onPress={() =>
           navigation.navigate("ExerciseDetail", {
             treinoId: item.treinoId,
+            subtreinoId: item.subtreinoId,
             id: item.exercicioId,
           })
         }
       >
         <View style={styles.info}>
           <Text style={styles.nome}>{item.nomeExercicio}</Text>
-          <Text style={styles.treino}>{item.tituloTreino}</Text>
+          <Text style={styles.treino}>
+            {item.tituloTreino} • {item.tituloSubtreino}
+          </Text>
           <Text
             style={[
               styles.evolucao,

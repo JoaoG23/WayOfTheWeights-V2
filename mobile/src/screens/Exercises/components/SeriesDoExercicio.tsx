@@ -31,6 +31,7 @@ import { cores } from "../../../theme/cores";
 
 interface SeriesDoExercicioProps {
   treinoId: number;
+  subtreinoId: number;
   exercicioId: number;
 }
 
@@ -42,6 +43,7 @@ interface DadosSerie {
 // "Série 1, 2, 3" é a posição na lista (ordem de criação).
 export const SeriesDoExercicio = ({
   treinoId,
+  subtreinoId,
   exercicioId,
 }: SeriesDoExercicioProps) => {
   const queryClient = useQueryClient();
@@ -51,8 +53,8 @@ export const SeriesDoExercicio = ({
   });
 
   const { data: series = [], isLoading } = useQuery({
-    queryKey: ["series", treinoId, exercicioId],
-    queryFn: () => listarSeries(treinoId, exercicioId),
+    queryKey: ["series", subtreinoId, exercicioId],
+    queryFn: () => listarSeries(treinoId, subtreinoId, exercicioId),
   });
 
   // As listas de exercícios mostram o resumo das séries, então também
@@ -72,8 +74,14 @@ export const SeriesDoExercicio = ({
     mutationFn: ({ repeticoes }: DadosSerie) => {
       const quantidadeRepeticoes = converterTextoEmRepeticoes(repeticoes);
       return serieEmEdicao
-        ? atualizarSerie(treinoId, exercicioId, serieEmEdicao.id, quantidadeRepeticoes)
-        : criarSerie(treinoId, exercicioId, quantidadeRepeticoes);
+        ? atualizarSerie(
+            treinoId,
+            subtreinoId,
+            exercicioId,
+            serieEmEdicao.id,
+            quantidadeRepeticoes
+          )
+        : criarSerie(treinoId, subtreinoId, exercicioId, quantidadeRepeticoes);
     },
     onSuccess: () => {
       aposAlterarSeries();
@@ -84,7 +92,7 @@ export const SeriesDoExercicio = ({
   });
 
   const { mutate: excluirSerie } = useMutation({
-    mutationFn: (id: number) => removerSerie(treinoId, exercicioId, id),
+    mutationFn: (id: number) => removerSerie(treinoId, subtreinoId, exercicioId, id),
     onSuccess: (_resposta, idRemovido) => {
       aposAlterarSeries();
       if (serieEmEdicao?.id === idRemovido) cancelarEdicao();

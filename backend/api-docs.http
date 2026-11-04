@@ -128,11 +128,41 @@ Content-Type: application/json
 DELETE {{baseUrl}}/treinos/1
 
 ### ---------------------------------------------------------------------
-### Exercícios de um treino
+### Subtreinos de um treino (no máximo 3 por treino; abrigam os exercícios)
+### ---------------------------------------------------------------------
+
+### Criar subtreino
+POST {{baseUrl}}/treinos/1/subtreinos
+Content-Type: application/json
+
+{
+  "titulo": "Peito",
+  "descricao": "Supinos e crucifixo"
+}
+
+### Listar subtreinos do treino
+GET {{baseUrl}}/treinos/1/subtreinos
+
+### Buscar subtreino
+GET {{baseUrl}}/treinos/1/subtreinos/1
+
+### Atualizar subtreino
+PUT {{baseUrl}}/treinos/1/subtreinos/1
+Content-Type: application/json
+
+{
+  "titulo": "Peito e Tríceps"
+}
+
+### Remover subtreino (remove também os exercícios dele)
+DELETE {{baseUrl}}/treinos/1/subtreinos/1
+
+### ---------------------------------------------------------------------
+### Exercícios de um subtreino
 ### ---------------------------------------------------------------------
 
 ### Criar exercício (grava o primeiro registro no histórico)
-POST {{baseUrl}}/treinos/1/exercicios
+POST {{baseUrl}}/treinos/1/subtreinos/1/exercicios
 Content-Type: application/json
 
 {
@@ -141,13 +171,13 @@ Content-Type: application/json
 }
 
 ### Listar exercícios do treino
-GET {{baseUrl}}/treinos/1/exercicios
+GET {{baseUrl}}/treinos/1/subtreinos/1/exercicios
 
 ### Buscar exercício
-GET {{baseUrl}}/treinos/1/exercicios/1
+GET {{baseUrl}}/treinos/1/subtreinos/1/exercicios/1
 
 ### Atualizar carga (kg inteiro de 1 a 1500; grava no histórico quando muda)
-PUT {{baseUrl}}/treinos/1/exercicios/1
+PUT {{baseUrl}}/treinos/1/subtreinos/1/exercicios/1
 Content-Type: application/json
 
 {
@@ -155,13 +185,13 @@ Content-Type: application/json
 }
 
 ### Histórico de cargas do exercício
-GET {{baseUrl}}/treinos/1/exercicios/1/historico
+GET {{baseUrl}}/treinos/1/subtreinos/1/exercicios/1/historico
 
 ### Remover exercício
-DELETE {{baseUrl}}/treinos/1/exercicios/1
+DELETE {{baseUrl}}/treinos/1/subtreinos/1/exercicios/1
 
 ### Séries do exercício (repetições de 1 a 100; a numeração é a ordem de criação)
-POST {{baseUrl}}/treinos/1/exercicios/1/series
+POST {{baseUrl}}/treinos/1/subtreinos/1/exercicios/1/series
 Content-Type: application/json
 
 {
@@ -169,10 +199,10 @@ Content-Type: application/json
 }
 
 ### Listar séries do exercício
-GET {{baseUrl}}/treinos/1/exercicios/1/series
+GET {{baseUrl}}/treinos/1/subtreinos/1/exercicios/1/series
 
 ### Atualizar repetições de uma série
-PUT {{baseUrl}}/treinos/1/exercicios/1/series/1
+PUT {{baseUrl}}/treinos/1/subtreinos/1/exercicios/1/series/1
 Content-Type: application/json
 
 {
@@ -180,7 +210,7 @@ Content-Type: application/json
 }
 
 ### Remover série
-DELETE {{baseUrl}}/treinos/1/exercicios/1/series/1
+DELETE {{baseUrl}}/treinos/1/subtreinos/1/exercicios/1/series/1
 
 ### ---------------------------------------------------------------------
 ### Estatísticas

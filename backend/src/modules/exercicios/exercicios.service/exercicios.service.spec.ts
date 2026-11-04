@@ -3,14 +3,14 @@ import { NotFoundException } from '@nestjs/common';
 
 import { ExerciciosService } from './exercicios.service';
 import { ExerciciosRepositories } from '../exercicios.repositories/exercicios.repositories';
-import { TreinosService } from '../../treinos/treinos.service/treinos.service';
+import { SubtreinosService } from '../../subtreinos/subtreinos.service/subtreinos.service';
 import { PayloadJwt } from '../../auth/tipos/payload-jwt';
 import { PerfilUsuario } from '../../../generated/prisma/enums';
 
 describe('ExerciciosService', () => {
   let service: ExerciciosService;
   let exerciciosRepositories: jest.Mocked<Partial<ExerciciosRepositories>>;
-  let treinosService: jest.Mocked<Partial<TreinosService>>;
+  let subtreinosService: jest.Mocked<Partial<SubtreinosService>>;
 
   const usuarioAutenticado: PayloadJwt = {
     sub: 1,
@@ -23,7 +23,7 @@ describe('ExerciciosService', () => {
   // Formato devolvido pelo repositório: carga vem do catálogo compartilhado.
   const exercicioBase = {
     id: 10,
-    treinoId: 5,
+    subtreinoId: 7,
     nome: 'Supino reto',
     cargaId: 60,
     carga: { valor: 60 },
@@ -42,7 +42,7 @@ describe('ExerciciosService', () => {
       listarHistoricoCargas: jest.fn(),
     };
 
-    treinosService = {
+    subtreinosService = {
       buscarPorId: jest.fn().mockResolvedValue({ id: 5, usuarioId: 1 }),
     };
 
@@ -50,7 +50,7 @@ describe('ExerciciosService', () => {
       providers: [
         ExerciciosService,
         { provide: ExerciciosRepositories, useValue: exerciciosRepositories },
-        { provide: TreinosService, useValue: treinosService },
+        { provide: SubtreinosService, useValue: subtreinosService },
       ],
     }).compile();
 
@@ -61,17 +61,18 @@ describe('ExerciciosService', () => {
 
   describe('criar', () => {
     it('valida acesso ao treino e cria o exercício gravando histórico', async () => {
-      const resultado = await service.criar(usuarioAutenticado, 5, {
+      const resultado = await service.criar(usuarioAutenticado, 5, 7, {
         nome: 'Supino reto',
         cargaAtual: 60,
       });
 
-      expect(treinosService.buscarPorId).toHaveBeenCalledWith(
+      expect(subtreinosService.buscarPorId).toHaveBeenCalledWith(
         usuarioAutenticado,
         5,
+        7,
       );
       expect(exerciciosRepositories.criarComHistorico).toHaveBeenCalledWith({
-        treinoId: 5,
+        subtreinoId: 7,
         nome: 'Supino reto',
         cargaAtual: 60,
       });
@@ -95,6 +96,7 @@ describe('ExerciciosService', () => {
       const historico = await service.listarHistoricoCargas(
         usuarioAutenticado,
         5,
+        7,
         10,
       );
 
@@ -108,7 +110,7 @@ describe('ExerciciosService', () => {
         exercicioBase as any,
       );
 
-      await service.atualizar(usuarioAutenticado, 5, 10, { cargaAtual: 62 });
+      await service.atualizar(usuarioAutenticado, 5, 7, 10, { cargaAtual: 62 });
 
       expect(
         exerciciosRepositories.atualizarCargaComHistorico,
@@ -121,7 +123,7 @@ describe('ExerciciosService', () => {
         exercicioBase as any,
       );
 
-      await service.atualizar(usuarioAutenticado, 5, 10, {
+      await service.atualizar(usuarioAutenticado, 5, 7, 10, {
         nome: 'Supino inclinado',
       });
 
@@ -139,21 +141,21 @@ describe('ExerciciosService', () => {
         exercicioBase as any,
       );
 
-      await service.atualizar(usuarioAutenticado, 5, 10, { cargaAtual: 60 });
+      await service.atualizar(usuarioAutenticado, 5, 7, 10, { cargaAtual: 60 });
 
       expect(
         exerciciosRepositories.atualizarCargaComHistorico,
       ).not.toHaveBeenCalled();
     });
 
-    it('lança NotFoundException quando o exercício é de outro treino', async () => {
+    it('lança NotFoundException quando o exercício é de outro subtreino', async () => {
       exerciciosRepositories.buscarPorId!.mockResolvedValue({
         ...exercicioBase,
-        treinoId: 99,
+        subtreinoId: 99,
       } as any);
 
       await expect(
-        service.atualizar(usuarioAutenticado, 5, 10, { cargaAtual: 70 }),
+        service.atualizar(usuarioAutenticado, 5, 7, 10, { cargaAtual: 70 }),
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -163,7 +165,7 @@ describe('ExerciciosService', () => {
       exerciciosRepositories.buscarPorId!.mockResolvedValue(null);
 
       await expect(
-        service.remover(usuarioAutenticado, 5, 999),
+        service.remover(usuarioAutenticado, 5, 7, 999),
       ).rejects.toThrow(NotFoundException);
       expect(exerciciosRepositories.remover).not.toHaveBeenCalled();
     });

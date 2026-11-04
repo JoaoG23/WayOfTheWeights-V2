@@ -10,12 +10,12 @@ import type { TNavigationScreenProps, TScreenDefinition } from "../../../Routes"
 
 export const RemoveExercise = () => {
   const navigation = useNavigation<TNavigationScreenProps>();
-  const { treinoId, id, nome } =
+  const { treinoId, subtreinoId, id, nome } =
     useRoute<RouteProp<TScreenDefinition, "RemoveExercise">>().params;
   const queryClient = useQueryClient();
 
   const { mutate: confirmarRemocao, isPending } = useMutation({
-    mutationFn: () => removerExercicio(treinoId, id),
+    mutationFn: () => removerExercicio(treinoId, subtreinoId, id),
     onSuccess: () => {
       invalidarConsultasExercicios(queryClient);
       Toast.show({

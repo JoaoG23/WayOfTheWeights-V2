@@ -20,6 +20,7 @@ describe('SeriesService', () => {
     email: 'aluno@teste.com',
   };
   const treinoId = 5;
+  const subtreinoId = 7;
   const exercicioId = 10;
   const serieBase = {
     id: 100,
@@ -56,13 +57,14 @@ describe('SeriesService', () => {
 
   describe('criar', () => {
     it('valida o acesso ao exercício e cria a série', async () => {
-      await service.criar(usuarioAutenticado, treinoId, exercicioId, {
+      await service.criar(usuarioAutenticado, treinoId, subtreinoId, exercicioId, {
         repeticoes: 12,
       });
 
       expect(exerciciosService.buscarPorId).toHaveBeenCalledWith(
         usuarioAutenticado,
         treinoId,
+        subtreinoId,
         exercicioId,
       );
       expect(seriesRepositories.criar).toHaveBeenCalledWith({
@@ -77,7 +79,7 @@ describe('SeriesService', () => {
       );
 
       await expect(
-        service.criar(usuarioAutenticado, treinoId, exercicioId, {
+        service.criar(usuarioAutenticado, treinoId, subtreinoId, exercicioId, {
           repeticoes: 12,
         }),
       ).rejects.toThrow(NotFoundException);
@@ -90,6 +92,7 @@ describe('SeriesService', () => {
       const series = await service.listarPorExercicio(
         usuarioAutenticado,
         treinoId,
+        subtreinoId,
         exercicioId,
       );
 
@@ -107,6 +110,7 @@ describe('SeriesService', () => {
       await service.atualizar(
         usuarioAutenticado,
         treinoId,
+        subtreinoId,
         exercicioId,
         serieBase.id,
         { repeticoes: 10 },
@@ -125,7 +129,7 @@ describe('SeriesService', () => {
       } as any);
 
       await expect(
-        service.atualizar(usuarioAutenticado, treinoId, exercicioId, 100, {
+        service.atualizar(usuarioAutenticado, treinoId, subtreinoId, exercicioId, 100, {
           repeticoes: 10,
         }),
       ).rejects.toThrow(NotFoundException);
@@ -138,7 +142,7 @@ describe('SeriesService', () => {
       seriesRepositories.buscarPorId!.mockResolvedValue(null);
 
       await expect(
-        service.remover(usuarioAutenticado, treinoId, exercicioId, 999),
+        service.remover(usuarioAutenticado, treinoId, subtreinoId, exercicioId, 999),
       ).rejects.toThrow(NotFoundException);
       expect(seriesRepositories.remover).not.toHaveBeenCalled();
     });
@@ -146,7 +150,7 @@ describe('SeriesService', () => {
     it('remove a série do exercício', async () => {
       seriesRepositories.buscarPorId!.mockResolvedValue(serieBase as any);
 
-      await service.remover(usuarioAutenticado, treinoId, exercicioId, 100);
+      await service.remover(usuarioAutenticado, treinoId, subtreinoId, exercicioId, 100);
 
       expect(seriesRepositories.remover).toHaveBeenCalledWith(100);
     });

@@ -24,10 +24,11 @@ export const Exercises = () => {
     ({ item }: { item: ResumoEvolucaoExercicio }) => (
       <ExerciseItem
         treinoId={item.treinoId}
+        subtreinoId={item.subtreinoId}
         exercicioId={item.exercicioId}
         nome={item.nomeExercicio}
         cargaAtual={item.cargaAtual}
-        subtitulo={item.tituloTreino}
+        subtitulo={`${item.tituloTreino} • ${item.tituloSubtreino}`}
       />
     ),
     []

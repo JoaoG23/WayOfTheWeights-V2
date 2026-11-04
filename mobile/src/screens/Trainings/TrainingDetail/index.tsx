@@ -7,13 +7,17 @@ import { useQuery } from "@tanstack/react-query";
 import { ButtonFloating } from "../../../components/ButtonFloating";
 import { DecoracaoFundo } from "../../../components/DecoracaoFundo";
 import { Carregando, MensagemTela } from "../../../components/Feedback";
-import { ExerciseItem } from "../../Exercises/ExerciseItem";
-import { listarExerciciosDoTreino } from "../../Exercises/api";
-import { Exercicio } from "../../Exercises/types/exerciciosTypes";
+import { SubtrainingItem } from "../../Subtrainings/SubtrainingItem";
+import { listarSubtreinos } from "../../Subtrainings/api";
+import {
+  Subtreino,
+  SUBTREINOS_MAXIMOS_POR_TREINO,
+} from "../../Subtrainings/types/subtreinosTypes";
 import { buscarTreino } from "../api";
 import { cores } from "../../../theme/cores";
 import type { TNavigationScreenProps, TScreenDefinition } from "../../../Routes";
 
+// Treino aberto: mostra os subtreinos (até 3), que abrigam os exercícios.
 export const TrainingDetail = () => {
   const navigation = useNavigation<TNavigationScreenProps>();
   const { id, titulo } =
@@ -24,41 +28,35 @@ export const TrainingDetail = () => {
     queryFn: () => buscarTreino(id),
   });
   const {
-    data: exercicios = [],
+    data: subtreinos = [],
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["exercicios", id],
-    queryFn: () => listarExerciciosDoTreino(id),
+    queryKey: ["subtreinos", id],
+    queryFn: () => listarSubtreinos(id),
   });
 
   const tituloTreino = treino?.titulo ?? titulo;
+  const podeAdicionarSubtreino =
+    subtreinos.length < SUBTREINOS_MAXIMOS_POR_TREINO;
 
   const renderItem = useCallback(
-    ({ item }: { item: Exercicio }) => (
-      <ExerciseItem
-        treinoId={item.treinoId}
-        exercicioId={item.id}
-        nome={item.nome}
-        cargaAtual={item.cargaAtual}
-        repeticoesPorSerie={item.repeticoesPorSerie}
-      />
-    ),
+    ({ item }: { item: Subtreino }) => <SubtrainingItem item={item} />,
     []
   );
-  const keyExtractor = useCallback((item: Exercicio) => item.id.toString(), []);
+  const keyExtractor = useCallback((item: Subtreino) => item.id.toString(), []);
 
-  const renderizarExercicios = () => {
+  const renderizarSubtreinos = () => {
     if (isLoading) return <Carregando />;
-    if (isError) return <MensagemTela texto="Erro ao carregar os exercícios." />;
-    if (exercicios.length === 0) {
+    if (isError) return <MensagemTela texto="Erro ao carregar os subtreinos." />;
+    if (subtreinos.length === 0) {
       return (
-        <MensagemTela texto="Nenhum exercício neste treino. Toque no + para adicionar." />
+        <MensagemTela texto="Este treino ainda não tem subtreinos. Toque no + para criar o primeiro (ex.: Peito)." />
       );
     }
     return (
       <FlatList
-        data={exercicios}
+        data={subtreinos}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         contentContainerStyle={styles.lista}
@@ -75,6 +73,9 @@ export const TrainingDetail = () => {
           {treino?.descricao ? (
             <Text style={styles.descricao}>{treino.descricao}</Text>
           ) : null}
+          <Text style={styles.contador}>
+            Subtreinos {subtreinos.length}/{SUBTREINOS_MAXIMOS_POR_TREINO}
+          </Text>
         </View>
         <View style={styles.acoes}>
           <TouchableOpacity
@@ -92,10 +93,12 @@ export const TrainingDetail = () => {
         </View>
       </View>
 
-      {renderizarExercicios()}
-      <ButtonFloating
-        onPress={() => navigation.navigate("AddExercise", { treinoId: id })}
-      />
+      {renderizarSubtreinos()}
+      {podeAdicionarSubtreino && (
+        <ButtonFloating
+          onPress={() => navigation.navigate("AddSubtraining", { treinoId: id })}
+        />
+      )}
     </View>
   );
 };
@@ -111,6 +114,7 @@ const styles = StyleSheet.create({
   textosCabecalho: { flex: 1, gap: 4 },
   titulo: { fontSize: 22, fontWeight: "bold", color: cores.texto },
   descricao: { fontSize: 14, color: cores.textoSecundario },
+  contador: { fontSize: 13, color: cores.ciano, fontWeight: "600" },
   acoes: { flexDirection: "row", gap: 18, paddingTop: 4 },
   lista: { paddingHorizontal: 16, paddingBottom: 100 },
 });

@@ -3,6 +3,8 @@ export class ResumoEvolucaoExercicioDto {
   nomeExercicio: string;
   treinoId: number;
   tituloTreino: string;
+  subtreinoId: number;
+  tituloSubtreino: string;
   cargaInicial: number;
   cargaAtual: number;
   // cargaAtual - cargaInicial, em kg.

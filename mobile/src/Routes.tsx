@@ -28,6 +28,12 @@ import {
   RemoveTraining,
 } from "./screens/Trainings";
 import {
+  SubtrainingDetail,
+  AddSubtraining,
+  EditSubtraining,
+  RemoveSubtraining,
+} from "./screens/Subtrainings";
+import {
   Exercises,
   AddExercise,
   ExerciseDetail,
@@ -59,9 +65,18 @@ export type TScreenDefinition = {
   AddTraining: undefined;
   EditTraining: { id: number };
   RemoveTraining: { id: number; titulo: string };
-  AddExercise: { treinoId: number };
-  ExerciseDetail: { treinoId: number; id: number };
-  RemoveExercise: { treinoId: number; id: number; nome: string };
+  AddSubtraining: { treinoId: number };
+  SubtrainingDetail: { treinoId: number; id: number; titulo: string };
+  EditSubtraining: { treinoId: number; id: number };
+  RemoveSubtraining: { treinoId: number; id: number; titulo: string };
+  AddExercise: { treinoId: number; subtreinoId: number };
+  ExerciseDetail: { treinoId: number; subtreinoId: number; id: number };
+  RemoveExercise: {
+    treinoId: number;
+    subtreinoId: number;
+    id: number;
+    nome: string;
+  };
 };
 
 const Tab = createBottomTabNavigator<TTabDefinition>();
@@ -168,6 +183,10 @@ export const AppRoutes = () => {
             <Stack.Screen name="AddTraining" component={AddTraining} />
             <Stack.Screen name="EditTraining" component={EditTraining} />
             <Stack.Screen name="RemoveTraining" component={RemoveTraining} />
+            <Stack.Screen name="AddSubtraining" component={AddSubtraining} />
+            <Stack.Screen name="SubtrainingDetail" component={SubtrainingDetail} />
+            <Stack.Screen name="EditSubtraining" component={EditSubtraining} />
+            <Stack.Screen name="RemoveSubtraining" component={RemoveSubtraining} />
             <Stack.Screen name="AddExercise" component={AddExercise} />
             <Stack.Screen name="ExerciseDetail" component={ExerciseDetail} />
             <Stack.Screen name="RemoveExercise" component={RemoveExercise} />

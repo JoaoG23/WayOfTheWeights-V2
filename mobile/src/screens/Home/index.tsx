@@ -70,6 +70,7 @@ export const Home = () => {
               onPress={() =>
                 navigation.navigate("ExerciseDetail", {
                   treinoId: maiorEvolucao.treinoId,
+                  subtreinoId: maiorEvolucao.subtreinoId,
                   id: maiorEvolucao.exercicioId,
                 })
               }

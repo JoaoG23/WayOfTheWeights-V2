@@ -6,12 +6,12 @@ import {
   ExercicioRespostaDto,
   HistoricoCargaRespostaDto,
 } from '../exercicios.dto/exercicio-resposta.dto';
-import { TreinosService } from '../../treinos/treinos.service/treinos.service';
+import { SubtreinosService } from '../../subtreinos/subtreinos.service/subtreinos.service';
 import { PayloadJwt } from '../../auth/tipos/payload-jwt';
 
 type ExercicioComCarga = {
   id: number;
-  treinoId: number;
+  subtreinoId: number;
   nome: string;
   carga: { valor: number };
   series: { repeticoes: number }[];
@@ -23,43 +23,55 @@ type ExercicioComCarga = {
 export class ExerciciosService {
   constructor(
     private readonly exerciciosRepositories: ExerciciosRepositories,
-    private readonly treinosService: TreinosService,
+    private readonly subtreinosService: SubtreinosService,
   ) {}
 
   async criar(
     usuarioAutenticado: PayloadJwt,
     treinoId: number,
+    subtreinoId: number,
     dadosExercicio: CriarExercicioDto,
   ): Promise<ExercicioRespostaDto> {
-    await this.treinosService.buscarPorId(usuarioAutenticado, treinoId);
+    await this.subtreinosService.buscarPorId(
+      usuarioAutenticado,
+      treinoId,
+      subtreinoId,
+    );
 
     const exercicioCriado =
       await this.exerciciosRepositories.criarComHistorico({
-        treinoId,
+        subtreinoId,
         nome: dadosExercicio.nome,
         cargaAtual: dadosExercicio.cargaAtual,
       });
     return this.paraResposta(exercicioCriado);
   }
 
-  async listarPorTreino(
+  async listarPorSubtreino(
     usuarioAutenticado: PayloadJwt,
     treinoId: number,
+    subtreinoId: number,
   ): Promise<ExercicioRespostaDto[]> {
-    await this.treinosService.buscarPorId(usuarioAutenticado, treinoId);
+    await this.subtreinosService.buscarPorId(
+      usuarioAutenticado,
+      treinoId,
+      subtreinoId,
+    );
     const exercicios =
-      await this.exerciciosRepositories.listarPorTreino(treinoId);
+      await this.exerciciosRepositories.listarPorSubtreino(subtreinoId);
     return exercicios.map((exercicio) => this.paraResposta(exercicio));
   }
 
   async buscarPorId(
     usuarioAutenticado: PayloadJwt,
     treinoId: number,
+    subtreinoId: number,
     id: number,
   ): Promise<ExercicioRespostaDto> {
     const exercicio = await this.validarExercicioExiste(
       usuarioAutenticado,
       treinoId,
+      subtreinoId,
       id,
     );
     return this.paraResposta(exercicio);
@@ -70,12 +82,14 @@ export class ExerciciosService {
   async atualizar(
     usuarioAutenticado: PayloadJwt,
     treinoId: number,
+    subtreinoId: number,
     id: number,
     dadosExercicio: AtualizarExercicioDto,
   ): Promise<ExercicioRespostaDto> {
     const exercicio = await this.validarExercicioExiste(
       usuarioAutenticado,
       treinoId,
+      subtreinoId,
       id,
     );
 
@@ -101,18 +115,30 @@ export class ExerciciosService {
   async remover(
     usuarioAutenticado: PayloadJwt,
     treinoId: number,
+    subtreinoId: number,
     id: number,
   ): Promise<void> {
-    await this.validarExercicioExiste(usuarioAutenticado, treinoId, id);
+    await this.validarExercicioExiste(
+      usuarioAutenticado,
+      treinoId,
+      subtreinoId,
+      id,
+    );
     await this.exerciciosRepositories.remover(id);
   }
 
   async listarHistoricoCargas(
     usuarioAutenticado: PayloadJwt,
     treinoId: number,
+    subtreinoId: number,
     id: number,
   ): Promise<HistoricoCargaRespostaDto[]> {
-    await this.validarExercicioExiste(usuarioAutenticado, treinoId, id);
+    await this.validarExercicioExiste(
+      usuarioAutenticado,
+      treinoId,
+      subtreinoId,
+      id,
+    );
     const historico =
       await this.exerciciosRepositories.listarHistoricoCargas(id);
     return historico.map((registro) => ({
@@ -125,13 +151,18 @@ export class ExerciciosService {
   private async validarExercicioExiste(
     usuarioAutenticado: PayloadJwt,
     treinoId: number,
+    subtreinoId: number,
     id: number,
   ) {
-    await this.treinosService.buscarPorId(usuarioAutenticado, treinoId);
+    await this.subtreinosService.buscarPorId(
+      usuarioAutenticado,
+      treinoId,
+      subtreinoId,
+    );
 
     const exercicio = await this.exerciciosRepositories.buscarPorId(id);
-    if (!exercicio || exercicio.treinoId !== treinoId) {
-      throw new NotFoundException('Exercício não encontrado neste treino');
+    if (!exercicio || exercicio.subtreinoId !== subtreinoId) {
+      throw new NotFoundException('Exercício não encontrado neste subtreino');
     }
     return exercicio;
   }
@@ -141,7 +172,7 @@ export class ExerciciosService {
   private paraResposta(exercicio: ExercicioComCarga): ExercicioRespostaDto {
     return {
       id: exercicio.id,
-      treinoId: exercicio.treinoId,
+      subtreinoId: exercicio.subtreinoId,
       nome: exercicio.nome,
       cargaAtual: exercicio.carga.valor,
       repeticoesPorSerie: exercicio.series.map((serie) => serie.repeticoes),

@@ -18,8 +18,9 @@ src/
     ├── contas/              # /conta/plano — plano da conta e limites por perfil
     ├── usuarios/            # /usuarios (admin da conta), /conta (cadastro e dados próprios)
     ├── treinos/             # /treinos
-    ├── exercicios/          # /treinos/:treinoId/exercicios (+ /historico)
-    ├── series/              # /treinos/:treinoId/exercicios/:exercicioId/series
+    ├── subtreinos/          # /treinos/:treinoId/subtreinos (até 3 por treino)
+    ├── exercicios/          # /treinos/:treinoId/subtreinos/:subtreinoId/exercicios (+ /historico)
+    ├── series/              # /treinos/:treinoId/subtreinos/:subtreinoId/exercicios/:exercicioId/series
     └── estatisticas/        # /estatisticas/resumo
 ```
 
@@ -68,6 +69,7 @@ Administrador e treinador agem sobre outro usuário informando `usuarioId` (no c
 
 - As cargas vêm de um **catálogo compartilhado** por todas as contas (tabela `cargas`): kg **inteiros de 1 a 1500**, inseridos pela migration `cargas_compartilhadas`. A API recebe e devolve a carga como número (`cargaAtual`), e o vínculo com o catálogo é interno.
 - Cada exercício tem uma `cargaAtual`. A criação do exercício e **cada alteração de carga** gravam um registro em `historico_cargas`.
+- Um treino tem até **3 subtreinos** (ex.: Peito, Costas, Pernas) e os exercícios ficam dentro deles, com séries, cargas e histórico. Remover um subtreino remove seus exercícios.
 - Cada exercício tem **séries**, e cada série guarda as suas repetições (1 a 100). A numeração "Série 1, 2, 3" é a ordem de criação.
 - O resumo de estatísticas compara a primeira carga registrada com a atual (evolução em kg e %).
 

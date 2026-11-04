@@ -33,8 +33,10 @@ export class EstatisticasService {
       return {
         exercicioId: exercicio.id,
         nomeExercicio: exercicio.nome,
-        treinoId: exercicio.treino.id,
-        tituloTreino: exercicio.treino.titulo,
+        treinoId: exercicio.subtreino.treino.id,
+        tituloTreino: exercicio.subtreino.treino.titulo,
+        subtreinoId: exercicio.subtreino.id,
+        tituloSubtreino: exercicio.subtreino.titulo,
         cargaInicial,
         cargaAtual,
         evolucaoCarga,

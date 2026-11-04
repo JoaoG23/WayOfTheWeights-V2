@@ -1,6 +1,6 @@
 export class ExercicioRespostaDto {
   id: number;
-  treinoId: number;
+  subtreinoId: number;
   nome: string;
   cargaAtual: number;
   // Repetições de cada série, em ordem de criação (ex.: [12, 10, 8]).

@@ -110,10 +110,29 @@ model Treino {
   criadoEm     DateTime @default(now()) @map("criado_em")
   atualizadoEm DateTime @updatedAt @map("atualizado_em")
 
-  exercicios Exercicio[]
+  subtreinos Subtreino[]
 
   @@index([usuarioId])
   @@map("treinos")
+}
+
+// Divisão de um treino (ex.: "Peito", "Costas"), no máximo 3 por treino
+// (src/shared/constantes/limites-subtreino.ts). Abriga os exercícios, com as
+// séries, cargas e histórico deles.
+model Subtreino {
+  id           Int      @id @default(autoincrement())
+  treinoId     Int      @map("treino_id")
+  // O subtreino não tem sentido sem o treino — some junto com ele.
+  treino       Treino   @relation(fields: [treinoId], references: [id], onDelete: Cascade)
+  titulo       String
+  descricao    String?
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  exercicios Exercicio[]
+
+  @@index([treinoId])
+  @@map("subtreinos")
 }
 
 // Catálogo de cargas em kg inteiros (1 a 1500), compartilhado por todas as
@@ -131,21 +150,21 @@ model Carga {
 }
 
 model Exercicio {
-  id           Int      @id @default(autoincrement())
-  treinoId     Int      @map("treino_id")
-  treino       Treino   @relation(fields: [treinoId], references: [id], onDelete: Cascade)
+  id           Int       @id @default(autoincrement())
+  subtreinoId  Int       @map("subtreino_id")
+  subtreino    Subtreino @relation(fields: [subtreinoId], references: [id], onDelete: Cascade)
   nome         String
   // Carga atual (catálogo compartilhado). Cada carga nova também é gravada
   // em HistoricoCarga, que é a fonte das estatísticas de evolução de força.
-  cargaId      Int      @map("carga_id")
-  carga        Carga    @relation(fields: [cargaId], references: [id])
-  criadoEm     DateTime @default(now()) @map("criado_em")
-  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+  cargaId      Int       @map("carga_id")
+  carga        Carga     @relation(fields: [cargaId], references: [id])
+  criadoEm     DateTime  @default(now()) @map("criado_em")
+  atualizadoEm DateTime  @updatedAt @map("atualizado_em")
 
   historicoCargas HistoricoCarga[]
   series          Serie[]
 
-  @@index([treinoId])
+  @@index([subtreinoId])
   @@map("exercicios")
 }
 

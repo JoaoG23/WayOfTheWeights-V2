@@ -7,6 +7,8 @@ export interface ResumoEvolucaoExercicio {
   nomeExercicio: string;
   treinoId: number;
   tituloTreino: string;
+  subtreinoId: number;
+  tituloSubtreino: string;
   cargaInicial: number;
   cargaAtual: number;
   evolucaoCarga: number;

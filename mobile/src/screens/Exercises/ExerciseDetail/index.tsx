@@ -40,7 +40,7 @@ interface DadosNovaCarga {
 
 export const ExerciseDetail = () => {
   const navigation = useNavigation<TNavigationScreenProps>();
-  const { treinoId, id } =
+  const { treinoId, subtreinoId, id } =
     useRoute<RouteProp<TScreenDefinition, "ExerciseDetail">>().params;
   const queryClient = useQueryClient();
   const { control, handleSubmit, reset } = useForm<DadosNovaCarga>({
@@ -52,18 +52,19 @@ export const ExerciseDetail = () => {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["exercicio", treinoId, id],
-    queryFn: () => buscarExercicio(treinoId, id),
+    queryKey: ["exercicio", subtreinoId, id],
+    queryFn: () => buscarExercicio(treinoId, subtreinoId, id),
   });
   const { data: historico = [] } = useQuery({
-    queryKey: ["historico", treinoId, id],
-    queryFn: () => listarHistoricoCargas(treinoId, id),
+    queryKey: ["historico", subtreinoId, id],
+    queryFn: () => listarHistoricoCargas(treinoId, subtreinoId, id),
   });
 
   const { mutate: registrarCarga, isPending } = useMutation({
     mutationFn: (dadosNovaCarga: DadosNovaCarga) =>
       atualizarCargaExercicio(
         treinoId,
+        subtreinoId,
         id,
         converterTextoEmCarga(dadosNovaCarga.carga)
       ),
@@ -135,7 +136,11 @@ export const ExerciseDetail = () => {
           )}
         </Card>
 
-        <SeriesDoExercicio treinoId={treinoId} exercicioId={id} />
+        <SeriesDoExercicio
+          treinoId={treinoId}
+          subtreinoId={subtreinoId}
+          exercicioId={id}
+        />
 
         <Card>
           <Text style={styles.tituloHistorico}>Histórico de Evolução</Text>
@@ -147,6 +152,7 @@ export const ExerciseDetail = () => {
           onPress={() =>
             navigation.navigate("RemoveExercise", {
               treinoId,
+              subtreinoId,
               id,
               nome: exercicio.nome,
             })

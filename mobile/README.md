@@ -17,8 +17,9 @@ src/
 └── screens/
     ├── Auth/                 # Login, SignUp (cria conta)
     ├── Home/                 # saudação e destaques de evolução
-    ├── Trainings/            # lista, detalhe, criar, editar, remover treino
-    ├── Exercises/            # todos os exercícios, criar, detalhe (carga + gráfico), remover
+    ├── Trainings/            # lista, detalhe (mostra os subtreinos), criar, editar, remover treino
+    ├── Subtrainings/         # até 3 por treino: detalhe (exercícios), criar, editar, remover
+    ├── Exercises/            # todos os exercícios, criar, detalhe (carga, séries, gráfico), remover
     ├── Weights/              # aba Pesos: ranking de evolução de carga
     └── Account/              # dados do usuário e plano da conta
 ```
