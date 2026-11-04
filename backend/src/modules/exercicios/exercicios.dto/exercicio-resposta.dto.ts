@@ -3,6 +3,8 @@ export class ExercicioRespostaDto {
   treinoId: number;
   nome: string;
   cargaAtual: number;
+  // Repetições de cada série, em ordem de criação (ex.: [12, 10, 8]).
+  repeticoesPorSerie: number[];
   criadoEm: Date;
   atualizadoEm: Date;
 }

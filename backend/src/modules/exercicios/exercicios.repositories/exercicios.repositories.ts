@@ -16,6 +16,13 @@ export type DadosAtualizarCargaExercicio = {
 // valor em kg.
 const INCLUIR_CARGA = { carga: { select: { valor: true } } } as const;
 
+// Exercício sempre sai com a carga e as repetições de cada série (em ordem de
+// criação), para as listas mostrarem o resumo sem uma consulta por exercício.
+const INCLUIR_EXERCICIO = {
+  ...INCLUIR_CARGA,
+  series: { select: { repeticoes: true }, orderBy: { id: 'asc' } },
+} as const;
+
 // Vincula ao catálogo pelo valor em kg (único), sem consulta extra.
 const conectarCarga = (valorKg: number) => ({ connect: { valor: valorKg } });
 
@@ -26,7 +33,7 @@ export class ExerciciosRepositories {
   async buscarPorId(id: number) {
     return this.prisma.exercicio.findUnique({
       where: { id },
-      include: INCLUIR_CARGA,
+      include: INCLUIR_EXERCICIO,
     });
   }
 
@@ -34,7 +41,7 @@ export class ExerciciosRepositories {
     return this.prisma.exercicio.findMany({
       where: { treinoId },
       orderBy: { criadoEm: 'asc' },
-      include: INCLUIR_CARGA,
+      include: INCLUIR_EXERCICIO,
     });
   }
 
@@ -58,7 +65,7 @@ export class ExerciciosRepositories {
           create: { carga: conectarCarga(dados.cargaAtual) },
         },
       },
-      include: INCLUIR_CARGA,
+      include: INCLUIR_EXERCICIO,
     });
   }
 
@@ -66,7 +73,7 @@ export class ExerciciosRepositories {
     return this.prisma.exercicio.update({
       where: { id },
       data: { nome },
-      include: INCLUIR_CARGA,
+      include: INCLUIR_EXERCICIO,
     });
   }
 
@@ -83,7 +90,7 @@ export class ExerciciosRepositories {
           create: { carga: conectarCarga(dados.cargaAtual) },
         },
       },
-      include: INCLUIR_CARGA,
+      include: INCLUIR_EXERCICIO,
     });
   }
 

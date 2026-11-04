@@ -16,6 +16,7 @@ import { Card } from "../../../components/Card";
 import { Input } from "../../../components/Input/Input";
 import { Button } from "../../../components/Button";
 import { GraficoEvolucao } from "../../../components/GraficoEvolucao";
+import { SeriesDoExercicio } from "../components/SeriesDoExercicio";
 import { Carregando, MensagemTela } from "../../../components/Feedback";
 import { DecoracaoFundo } from "../../../components/DecoracaoFundo";
 import {
@@ -133,6 +134,8 @@ export const ExerciseDetail = () => {
             />
           )}
         </Card>
+
+        <SeriesDoExercicio treinoId={treinoId} exercicioId={id} />
 
         <Card>
           <Text style={styles.tituloHistorico}>Histórico de Evolução</Text>

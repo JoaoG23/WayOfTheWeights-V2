@@ -27,6 +27,7 @@ describe('ExerciciosService', () => {
     nome: 'Supino reto',
     cargaId: 60,
     carga: { valor: 60 },
+    series: [{ repeticoes: 12 }, { repeticoes: 10 }],
     criadoEm: new Date(),
     atualizadoEm: new Date(),
   };
@@ -76,6 +77,7 @@ describe('ExerciciosService', () => {
       });
       // A resposta expõe a carga como número, não o registro do catálogo.
       expect(resultado.cargaAtual).toBe(60);
+      expect(resultado.repeticoesPorSerie).toEqual([12, 10]);
       expect(resultado).not.toHaveProperty('carga');
     });
   });

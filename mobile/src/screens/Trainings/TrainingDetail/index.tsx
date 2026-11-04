@@ -41,6 +41,7 @@ export const TrainingDetail = () => {
         exercicioId={item.id}
         nome={item.nome}
         cargaAtual={item.cargaAtual}
+        repeticoesPorSerie={item.repeticoesPorSerie}
       />
     ),
     []

@@ -3,8 +3,15 @@ export interface Exercicio {
   treinoId: number;
   nome: string;
   cargaAtual: number;
+  repeticoesPorSerie: number[];
   criadoEm: string;
   atualizadoEm: string;
+}
+
+export interface Serie {
+  id: number;
+  exercicioId: number;
+  repeticoes: number;
 }
 
 export interface HistoricoCarga {

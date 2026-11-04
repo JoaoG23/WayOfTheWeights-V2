@@ -14,6 +14,7 @@ type ExercicioComCarga = {
   treinoId: number;
   nome: string;
   carga: { valor: number };
+  series: { repeticoes: number }[];
   criadoEm: Date;
   atualizadoEm: Date;
 };
@@ -143,6 +144,7 @@ export class ExerciciosService {
       treinoId: exercicio.treinoId,
       nome: exercicio.nome,
       cargaAtual: exercicio.carga.valor,
+      repeticoesPorSerie: exercicio.series.map((serie) => serie.repeticoes),
       criadoEm: exercicio.criadoEm,
       atualizadoEm: exercicio.atualizadoEm,
     };
