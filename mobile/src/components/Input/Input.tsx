@@ -7,25 +7,35 @@ import {
   TextInputProps,
   TouchableOpacity,
 } from "react-native";
-import { Control, RegisterOptions, useController } from "react-hook-form";
+import {
+  Control,
+  FieldValues,
+  Path,
+  RegisterOptions,
+  useController,
+} from "react-hook-form";
 import { Ionicons } from "@expo/vector-icons";
 import { cores } from "../../theme/cores";
 
-interface Props extends TextInputProps {
-  name: string;
-  control: Control<any>;
+// Genérico no tipo do formulário: `name` e `rules` são checados contra os
+// campos reais de cada form (e evita o Control<any>, incompatível com o
+// react-hook-form 7.68).
+interface Props<TFormulario extends FieldValues> extends TextInputProps {
+  name: Path<TFormulario>;
+  control: Control<TFormulario>;
   label?: string;
   error?: string;
   icon?: keyof typeof Ionicons.glyphMap;
   required?: boolean | string;
   // Regras extras do react-hook-form (pattern, minLength, validate...).
-  rules?: Omit<RegisterOptions, "required">;
+  rules?: Omit<RegisterOptions<TFormulario, Path<TFormulario>>, "required">;
   // "filled": campo escuro das telas internas; "underline": campo sublinhado
   // das telas de login/cadastro (fundo limão).
   variant?: "filled" | "underline";
 }
 
-export const Input = ({
+// Sem defaultValue aqui: cada formulário já define o seu em useForm.
+export const Input = <TFormulario extends FieldValues>({
   name,
   control,
   label,
@@ -37,7 +47,7 @@ export const Input = ({
   rules,
   variant = "filled",
   ...rest
-}: Props) => {
+}: Props<TFormulario>) => {
   const [isFocused, setIsFocused] = useState(false);
   const {
     field: { value, onChange, onBlur: fieldOnBlur },
@@ -45,12 +55,13 @@ export const Input = ({
   } = useController({
     name,
     control,
-    defaultValue: "",
     rules: {
       ...rules,
       required: required === true ? "Este campo é obrigatório" : required,
     },
   });
+  // Todos os campos que usam o Input são de texto.
+  const texto: string = value ?? "";
 
   const ehSublinhado = variant === "underline";
   const errorMessage = error || fieldError?.message;
@@ -87,7 +98,7 @@ export const Input = ({
 
         <TextInput
           style={[styles.field, { color: corTexto }]}
-          value={value}
+          value={texto}
           onChangeText={onChange}
           onFocus={(e) => {
             setIsFocused(true);
@@ -102,7 +113,7 @@ export const Input = ({
           {...rest}
         />
 
-        {value?.length > 0 && (
+        {texto.length > 0 && (
           <TouchableOpacity onPress={() => onChange("")}>
             <Ionicons name="close-circle" size={18} color={cores.neutro} />
           </TouchableOpacity>
