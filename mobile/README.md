@@ -19,7 +19,7 @@ src/
     ├── Auth/                 # Login (com biometria), SignUp, recuperação de senha por código
     ├── Home/                 # aba Dashboard: saudação e destaques de evolução
     ├── Trainings/            # lista, detalhe (mostra os subtreinos), criar, editar, remover treino
-    ├── Subtrainings/         # até 3 por treino: detalhe (exercícios), criar, editar, remover
+    ├── Subtrainings/         # até 3 por treino: detalhe (exercícios), criar, editar, remover, importar por imagens
     ├── Exercises/            # todos os exercícios, criar, detalhe (carga, séries, gráfico), remover
     ├── Weights/              # aba Pesos: ranking de evolução de carga
     └── Account/              # dados do usuário e plano da conta
@@ -28,6 +28,16 @@ src/
 ## Sessão
 
 O login grava o cookie httpOnly `jwt` (definido pelo backend). O networking nativo do Android e do iOS guarda esse cookie e o reenvia sozinho, então o app nunca manipula o token. Ao abrir, o app chama `GET /conta` para restaurar a sessão; qualquer resposta 401 volta para o login.
+
+## Importar subtreino por imagens (OCR)
+
+No detalhe do treino (ícone de câmera, enquanto houver vaga) ou do subtreino (atualizar), escolha fotos da ficha de treino pela galeria ou câmera (até 10).
+
+1. O app envia as imagens ao backend (`POST /treinos/:id/subtreinos/ocr`), que usa o Gemini e devolve o JSON padronizado do subtreino.
+2. Você **confere e corrige** o que foi lido: nome, carga e repetições de cada exercício, e pode remover os que vieram errados.
+3. Ao salvar (`PUT /treinos/:id/subtreinos/:id/importar`), o backend cria o subtreino ou atualiza o existente. Exercícios com o mesmo nome são atualizados; os que não estão na ficha ficam como estão.
+
+Requer `GEMINI_API_KEY` configurada no backend. `expo-image-picker` é um módulo nativo: gere o dev client de novo.
 
 ## Login por biometria
 

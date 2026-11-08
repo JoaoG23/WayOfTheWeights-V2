@@ -8,6 +8,7 @@ import { ContasModule } from './modules/contas/contas.module';
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
 import { TreinosModule } from './modules/treinos/treinos.module';
 import { SubtreinosModule } from './modules/subtreinos/subtreinos.module';
+import { ImportacaoSubtreinosModule } from './modules/importacao-subtreinos/importacao-subtreinos.module';
 import { ExerciciosModule } from './modules/exercicios/exercicios.module';
 import { SeriesModule } from './modules/series/series.module';
 import { EstatisticasModule } from './modules/estatisticas/estatisticas.module';
@@ -21,6 +22,7 @@ import { EstatisticasModule } from './modules/estatisticas/estatisticas.module';
     UsuariosModule,
     TreinosModule,
     SubtreinosModule,
+    ImportacaoSubtreinosModule,
     ExerciciosModule,
     SeriesModule,
     EstatisticasModule,

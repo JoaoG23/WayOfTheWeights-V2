@@ -32,6 +32,7 @@ import {
   AddSubtraining,
   EditSubtraining,
   RemoveSubtraining,
+  ImportSubtraining,
 } from "./screens/Subtrainings";
 import {
   Exercises,
@@ -69,6 +70,8 @@ export type TScreenDefinition = {
   SubtrainingDetail: { treinoId: number; id: number; titulo: string };
   EditSubtraining: { treinoId: number; id: number };
   RemoveSubtraining: { treinoId: number; id: number; titulo: string };
+  // Sem subtreinoId cria um subtreino novo; com ele, atualiza esse subtreino.
+  ImportSubtraining: { treinoId: number; subtreinoId?: number };
   AddExercise: { treinoId: number; subtreinoId: number };
   ExerciseDetail: { treinoId: number; subtreinoId: number; id: number };
   RemoveExercise: {
@@ -189,6 +192,7 @@ export const AppRoutes = () => {
             <Stack.Screen name="SubtrainingDetail" component={SubtrainingDetail} />
             <Stack.Screen name="EditSubtraining" component={EditSubtraining} />
             <Stack.Screen name="RemoveSubtraining" component={RemoveSubtraining} />
+            <Stack.Screen name="ImportSubtraining" component={ImportSubtraining} />
             <Stack.Screen name="AddExercise" component={AddExercise} />
             <Stack.Screen name="ExerciseDetail" component={ExerciseDetail} />
             <Stack.Screen name="RemoveExercise" component={RemoveExercise} />

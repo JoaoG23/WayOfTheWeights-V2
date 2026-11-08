@@ -78,6 +78,15 @@ export const TrainingDetail = () => {
           </Text>
         </View>
         <View style={styles.acoes}>
+          {podeAdicionarSubtreino && (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("ImportSubtraining", { treinoId: id })
+              }
+            >
+              <Feather name="camera" size={22} color={cores.ciano} />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             onPress={() => navigation.navigate("EditTraining", { id })}
           >

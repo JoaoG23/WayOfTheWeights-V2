@@ -49,6 +49,13 @@
         {
           "faceIDPermission": "Permite entrar no app com o reconhecimento facial."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permite escolher fotos da sua ficha de treino para importar.",
+          "cameraPermission": "Permite fotografar a sua ficha de treino para importar."
+        }
       ]
     ]
   }

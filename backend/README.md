@@ -2,7 +2,7 @@
 
 API do WayOfTheWeights V2: SaaS de treino focado em evolução de força.
 
-**Stack:** NestJS 10 · Prisma 7 (`@prisma/adapter-pg`) · PostgreSQL · JWT · Jest + Testcontainers
+**Stack:** NestJS 10 · Prisma 7 (`@prisma/adapter-pg`) · PostgreSQL · JWT · Google Gemini (`@google/genai`) · Jest + Testcontainers
 
 ## Estrutura
 
@@ -10,7 +10,7 @@ API do WayOfTheWeights V2: SaaS de treino focado em evolução de força.
 src/
 ├── main.ts / app.module.ts
 ├── prisma/                  # PrismaService global
-├── shared/                  # criptografia (bcrypt), email (nodemailer/SMTP), DTOs compartilhados
+├── shared/                  # criptografia (bcrypt), email (nodemailer/SMTP), gemini (OCR), DTOs compartilhados
 ├── generated/prisma/        # client gerado pelo Prisma (não versionado)
 └── modules/
     ├── auth/                # login JWT, guards globais, @Public, @Roles, @UsuarioAutenticado
@@ -19,6 +19,7 @@ src/
     ├── usuarios/            # /usuarios (admin da conta), /conta (cadastro e dados próprios)
     ├── treinos/             # /treinos
     ├── subtreinos/          # /treinos/:treinoId/subtreinos (até 3 por treino)
+    ├── importacao-subtreinos/ # /treinos/:treinoId/subtreinos/ocr e /:id/importar (leitura de imagens com Gemini + upsert)
     ├── exercicios/          # /treinos/:treinoId/subtreinos/:subtreinoId/exercicios (+ /historico)
     ├── series/              # /treinos/:treinoId/subtreinos/:subtreinoId/exercicios/:exercicioId/series
     └── estatisticas/        # /estatisticas/resumo
@@ -64,6 +65,32 @@ Cada assinante do SaaS é uma **conta**. O autocadastro (`POST /conta`) cria a c
 | `ALUNO`         | Apenas os próprios dados, treinos, exercícios e estatísticas                           |
 
 Administrador e treinador agem sobre outro usuário informando `usuarioId` (no corpo ao criar treino, ou `?usuarioId=` na listagem de treinos e nas estatísticas).
+
+## Importação de subtreinos por imagens (OCR com Gemini)
+
+Duas rotas, em dois passos, para o usuário conferir o que foi lido antes de gravar:
+
+1. `POST /treinos/:treinoId/subtreinos/ocr` — `multipart/form-data`, campo **`imagens`** (1 a 10 arquivos jpeg/png/webp/heic de até 8 MB). As imagens vão para o Gemini, que devolve o **JSON padronizado** abaixo. **Não grava nada.**
+2. `PUT /treinos/:treinoId/subtreinos/:id/importar` — recebe esse JSON (já corrigido, se preciso) e faz o **upsert por id**.
+
+```json
+{
+  "titulo": "Peito",
+  "descricao": "Treino A",
+  "exercicios": [
+    { "nome": "Supino reto", "cargaAtual": 40, "repeticoesPorSerie": [12, 10, 8] }
+  ]
+}
+```
+
+Regras do upsert:
+
+- Se o subtreino `:id` **existe neste treino**, é atualizado (título e descrição). Se não existe (inclusive um id de outro treino ou conta), é **criado** com id novo gerado pelo banco; a resposta traz `criado: true|false` e o id real. A criação respeita o limite de 3 subtreinos (409).
+- Exercícios são casados pelo **nome** (sem diferenciar maiúsculas): o existente é atualizado, o novo é criado, e os que **não vieram no JSON ficam como estão** (nada é apagado). Nomes repetidos no JSON são rejeitados.
+- A carga só gera novo ponto no histórico quando muda. `repeticoesPorSerie` informado substitui as séries do exercício; omitido ou vazio mantém as atuais.
+- Limites: carga inteira 1–1500, repetições 1–100, até 20 séries por exercício e 30 exercícios por subtreino.
+
+Configuração no `.env`: `GEMINI_API_KEY` (crie em https://aistudio.google.com/api-keys) e, opcionalmente, `GEMINI_MODEL` (padrão `gemini-3.8-flash`). Se o Gemini responder erro temporário (503/429/5xx), o backend tenta de novo 3 vezes com espera crescente e depois usa `GEMINI_MODEL_CONTINGENCIA` (padrão `gemini-2.5-flash`); esgotado, responde 502. Sem a chave, o OCR responde 503; a importação do JSON funciona normalmente.
 
 ## Regras de negócio
 

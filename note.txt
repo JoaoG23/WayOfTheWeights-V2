@@ -1,10 +1,11 @@
 Falta implementar:
     x - Implementar um CRUD de usuário e tipo de usuário, Aluno, Treinador e Administrador;
     x - Implementar troca de senha na parte de fora do app no frontend;
-    - Implementar autenticação via credenciais locais do celular, exemplo: enves de ficar digitando senha ou email recorrentemente
+    x - Implementar autenticação via credenciais locais do celular, exemplo: enves de ficar digitando senha ou email recorrentemente
     antes de logar, use o padrão do Celular ou impressão digital;
     - Implementar ORC com SDK do gemini para leitura imagens para importação de treinos novos via imagens;
         - Usuário envia varias imagens em anexo 
         - Sistema manda para gemini
         - Gemini retorna tudo em formato de JSON
-    - Adicionar a possibilidade de agrupar os treinos antigo para os mais novos 
+    x - Adicionar a possibilidade de agrupar os treinos antigo para os mais novos;
+    - Mostrar os treinos mais recente primeiros; 

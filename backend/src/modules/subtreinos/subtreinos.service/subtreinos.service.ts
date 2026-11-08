@@ -71,7 +71,8 @@ export class SubtreinosService {
     await this.subtreinosRepositories.remover(id);
   }
 
-  private async validarLimiteDeSubtreinos(treinoId: number) {
+  // Público: a importação de subtreinos reaproveita a mesma regra ao criar.
+  async validarLimiteDeSubtreinos(treinoId: number) {
     const quantidadeAtual =
       await this.subtreinosRepositories.contarPorTreino(treinoId);
     if (quantidadeAtual >= SUBTREINOS_MAXIMOS_POR_TREINO) {

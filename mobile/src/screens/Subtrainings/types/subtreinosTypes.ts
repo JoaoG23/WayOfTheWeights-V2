@@ -14,3 +14,33 @@ export interface Subtreino {
 
 // Mesmos campos do treino: título e descrição.
 export type DadosSubtreino = DadosTreino;
+
+// JSON padronizado de transferência de um subtreino (OCR e importação).
+export interface ExercicioImportacao {
+  nome: string;
+  cargaAtual: number;
+  repeticoesPorSerie: number[];
+}
+
+export interface SubtreinoImportacao {
+  titulo: string;
+  descricao?: string;
+  exercicios: ExercicioImportacao[];
+}
+
+export interface ResultadoImportacao {
+  // true: subtreino novo; false: um existente foi atualizado.
+  criado: boolean;
+  id: number;
+  treinoId: number;
+  titulo: string;
+  descricao: string | null;
+  exercicios: (ExercicioImportacao & { id: number })[];
+}
+
+// Imagem escolhida na galeria/câmera, pronta para o upload.
+export interface ImagemSelecionada {
+  uri: string;
+  nome: string;
+  tipo: string;
+}

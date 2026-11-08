@@ -157,6 +157,32 @@ Content-Type: application/json
 ### Remover subtreino (remove também os exercícios dele)
 DELETE {{baseUrl}}/treinos/1/subtreinos/1
 
+### Ler imagens da ficha de treino (OCR com Gemini) -> devolve o JSON padronizado, sem gravar
+### Campo "imagens" (1 a 10 arquivos jpeg/png/webp/heic de até 8 MB)
+POST {{baseUrl}}/treinos/1/subtreinos/ocr
+Content-Type: multipart/form-data; boundary=limite
+
+--limite
+Content-Disposition: form-data; name="imagens"; filename="ficha.jpg"
+Content-Type: image/jpeg
+
+< ./ficha.jpg
+--limite--
+
+### Importar subtreino (upsert por id): atualiza se o id existir neste treino, senão cria um novo
+### Exercícios com o mesmo nome são atualizados; os novos são criados; os ausentes no JSON ficam como estão
+PUT {{baseUrl}}/treinos/1/subtreinos/1/importar
+Content-Type: application/json
+
+{
+  "titulo": "Peito",
+  "descricao": "Treino A",
+  "exercicios": [
+    { "nome": "Supino reto", "cargaAtual": 40, "repeticoesPorSerie": [12, 10, 8] },
+    { "nome": "Crucifixo", "cargaAtual": 14, "repeticoesPorSerie": [12, 12, 12] }
+  ]
+}
+
 ### ---------------------------------------------------------------------
 ### Exercícios de um subtreino
 ### ---------------------------------------------------------------------
