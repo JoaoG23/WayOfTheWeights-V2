@@ -82,6 +82,7 @@ export const ImportSubtraining = () => {
       });
     },
     onError: (erro) => {
+      console.log(erro);
       Toast.show({
         type: "error",
         text1: "Houve um erro",
