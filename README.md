@@ -1,188 +1,112 @@
-<div  align=center >
+<div align="center">
 
-<h1>WayOftheWeights-API 🏋🏽‍♂️<h1>
+<h1>Way Of The Weights 🏋🏽‍♂️</h1>
 
-<img width='300px' src="./assets/logo-png-name.png" />
+<img width="200px" src="./logo.png" />
+
+SaaS de treino focado na **evolução de força**: registre cargas, séries e repetições e acompanhe quanto você ficou mais forte.
 
 </div>
 
-### Indice 👨‍💻
+## Índice
 
-<p align=center>
- <li> <a href="#introdução">1 - 🚪Introdução</a> •</li>
- <li> <a href="#desenvolvimento">2 - ⚙️ Desenvolvimento e Tecnologias</a> • </li>
- <li> <a href="#instalar">3 - 👇🤘 Como instalar</a> • </li>
- <li> <a href="#usar">4 - 🤘Como Usar</a> • </li>
- <li> <a href="#consideraçoesfinais">5 - Considerações finais </a> • </li>
- <li> <a href="#autor">6 -🧑‍💻 Autor</a> • </li>
- <li> <a href="#licensa"> 7- Licença</a> • </li>
-</p>
+1. [Visão geral](#visão-geral)
+2. [Tecnologias](#tecnologias)
+3. [Estrutura do repositório](#estrutura-do-repositório)
+4. [Como rodar](#como-rodar)
+5. [Como funciona](#como-funciona)
+6. [Documentação por projeto](#documentação-por-projeto)
+7. [Autor](#autor)
+8. [Licença](#licença)
 
-## Edições ✏️📑
+## Visão geral
 
-|             Alterações             |   Data   | Versão |
-| :--------------------------------: | :------: | :----: |
-| Emissão Inicial | 06/10/22 | 1.0.1  |
+O Way Of The Weights (V2) é um monorepo com:
 
-<h2 id='introdução' color=green ><b>1 - Introdução</b></h2>
+- **backend**: API multi-tenant (uma **conta** por assinante) com perfis, planos e isolamento de dados por conta.
+- **mobile**: aplicativo Android/iOS para o dia a dia do treino.
 
-<img width="450px" src="https://media.tenor.com/fUUHTDw9pnsAAAAd/gym-fail-weak.gif">
+Esta versão substitui a V1 (Express + Sequelize), reescrita com NestJS e Prisma.
 
-API em desenvolvimento ainda, mas sistema tem o intuito de gestionar as quantidade de **pesos** que alcançado na **academia** pelo usuário
+## Tecnologias
 
-<h2 id='desenvolvimento'><b>2- Desenvolvimento e Tecnologias 🥵🧑‍🏭 </b></h2>
-<img width="450px" src="https://media.tenor.com/nq76xNvyoYkAAAAd/construction-lol.gif">
+| Projeto | Stack |
+| ------- | ----- |
+| Backend | NestJS 10 · Prisma 7 (`@prisma/adapter-pg`) · PostgreSQL · JWT em cookie httpOnly · bcrypt · nodemailer (SMTP) · Jest + Testcontainers |
+| Mobile  | Expo 58 / React Native · React Navigation · TanStack Query · axios · react-hook-form · react-native-svg · expo-local-authentication · expo-secure-store |
 
-Primeiramente usei a Biblioteca **JEST** e tive problemas para gerar testes em Typescript por causa das configurações, entretanto usei uma nova biblioteca que me surpreendeu. Com suporte a **Typescript**, **Vitest** é uma biblioteca que já possui nativamente suporta Typescript e é extremamente rápido para realizar teste nele. Com sempre o **Arquiterura MVC**, e pela primeira vez realizei um projeto sem nenhuma lógica no banco de dados, 🤦🏽‍♂️Aff como foi difícil abandonar aquelas procedures, enfim extrair um pouco do **Sequelize**, em conjunto com queries nativas, também pela primeira usei as **Migrations** na minha vida🥳 Poor\*\* que ferramenta incrível🤩.
+## Estrutura do repositório
 
-### 👥 Principais Tecnologia usadas até o momento
+```
+├── backend/   # API NestJS + Prisma (migrations em backend/prisma)
+├── mobile/    # app Expo / React Native
+└── logo.png
+```
 
-**• Typescript**
-**• PostgresSQL**
-**• Express**
-**• Sequelize**
-**• Nodejs**
+## Como rodar
 
-<section>  
-        <img width="70px" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original-wordmark.svg" />
-        <img width="70px" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-plain.svg" />
-   <img width="70px" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg" />     
-   <img width="70px" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sequelize/sequelize-original.svg" />     
-   <img width="70px" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" />     
-</section>
+Pré-requisitos: Node.js, PostgreSQL e, para os testes e2e do backend, Docker.
 
-<br>
+**Backend**
 
-Novamente, como sempre como nos projetos anteriores utilizei arquitura **MVC**
+```bash
+cd backend
+cp .env.example .env              # preencha DATABASE_URL, JWT_SECRET e SMTP_*
+npm install                       # também roda prisma generate
+npx prisma migrate dev
+npm run start:dev
+```
 
-<h2 id='instalar'><b>3- Como instalar 🧑‍🔧</b></h2>
+**Mobile**
 
-<h3><b>DATABASE</b></h3
+```bash
+cd mobile
+cp .env.example .env              # EXPO_PUBLIC_API_URL = IP da sua máquina (não localhost)
+npm install
+npx expo run:android              # ou run:ios — gera o dev client (módulos nativos)
+npm run start
+```
 
-**ATENCÃO🚨**
+**Testes (backend)**
 
-Se não quizer usar as **migrações** importe a base de dados que está na pasta /assets/**backup-db-wow-06-10-2022.sql**
+```bash
+npm run test        # unitários
+npm run test:e2e    # e2e, sobe um Postgres via Testcontainers
+```
 
+## Como funciona
 
+**Hierarquia de dados**
 
-**MIGRATIONS**
+```
+Conta ── Usuários (ADMINISTRADOR · TREINADOR · ALUNO)
+              └── Treino ── até 3 Subtreinos (ex.: Peito, Costas, Pernas)
+                                └── Exercício ── Séries (repetições) + histórico de cargas
+```
 
-1. Tenha um **NODEjs** e **PostgresSQL 11** instalado.
-2. Clone o projeto.
-3. Digite na pasta do projeto npm install.
-4. Entre na pasta /database-migrations
-5. Crie um .env na /database-migrations com as configuracao abaixo:
+- **Cargas:** catálogo compartilhado de kg **inteiros de 1 a 1500**. Cada alteração de carga grava um registro no histórico, e as estatísticas comparam a primeira carga com a atual (evolução em kg e %).
+- **Planos:** `BASICO` (1 administrador, 1 treinador, 1 aluno) e `BETA` (3 de cada). Os limites são validados ao criar usuário e ao trocar perfil.
+- **Perfis:** administrador faz tudo na conta; treinador gerencia treinos e estatísticas de qualquer usuário da conta; aluno acessa só os próprios dados.
+- **Sessão:** login grava o JWT em cookie `httpOnly` (24 h). O app mobile reaproveita o cookie sozinho.
+- **Recuperação de senha:** código de 6 dígitos enviado por email (vale 15 min, 5 tentativas, reenvio após 60 s).
+- **Login por biometria:** o app oferece entrar com digital, rosto ou desbloqueio do celular após o primeiro login com senha; as credenciais ficam no Keychain/Keystore do aparelho.
 
-                DB_HOST=
-                DB_PORT=
-                DB_DATABASE=
-                DB_USER=
-                DB_PASSWORD=
-                DB_DIALECT=
+## Documentação por projeto
 
-Preencha as configurações como o exemplo abaixo:
+- [backend/README.md](./backend/README.md): módulos, rotas, autenticação, planos, regras de negócio e testes. Requisições de exemplo em [backend/api-docs.http](./backend/api-docs.http).
+- [mobile/README.md](./mobile/README.md): estrutura do app, sessão e login por biometria.
 
-Exemplo preenchido .env:
+## Autor
 
+![avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/80895578?v=4?v=4&h=100&w=100&fit=cover&mask=circle&maxage=7d)
 
-
-                DB_HOST='localhost'
-                DB_PORT=5432
-                DB_DATABASE='db_wayoftheweights'
-                DB_USER='postgres'
-                DB_PASSWORD='admin'
-                DB_DIALECT='postgres'
-
-
-6. Digite **npx sequelize-cli db:migrate** dentro da pasta /database-migrations.
-
-7. **ATENÇAO🚨** 
-
-Se ele der algum erro, digite o comando acima novamente.
-
-<h2><b>SISTEMA</b></h2>
-
-
-7. Após isso crie um **.env** na pasta raiz **/** e configure apontando para sua base de dados. Conforme abaixo ou como sua preferencia :
-
-Exemplo nao preenchido no arquivo .env.example:
-
-                DB_HOST=
-                DB_PORT=
-                DB_DATABASE=
-                DB_USER=
-                DB_PASSWORD=
-                DB_DIALECT=
-
-                PORT_SERVER=
-                TOKEN_SECRET=
-
-Exemplo preenchido .env:
-
-                DB_HOST='localhost'
-                DB_PORT=5432
-                DB_DATABASE='db_wayoftheweights'
-                DB_USER='postgres'
-                DB_PASSWORD='admin'
-                DB_DIALECT='postgres'
-
-
-                PORT_SERVER=3000
-                TOKEN_SECRET='segredotoken'
-
-8. Após volte para pasta **/** e digite seguinte comando abaixo:
-
-   npm run build
-
-9. Em seguida para roda o projeto digite npm run prod
-
-10 . Dentro da pasta /**assets** há a collection da API chamada **collection_api_har-2022-10-06**, poderá usar para Usar na API de
-Teste, **_Insomnia ou postman_** de sua preferencia.
-
-<h2 id='usar'><b>4- Como usar 👩‍💻</b></h2>
-
-
-<img width='700px' src="./assets/fluxo.png" />
-
-Cada usuário tem um treino.
-Em cada treino tem vários exercícios
-E cada exercício tem a sua carga atual, anteriores, e histórico de performance.
-Sendo que cada inserção de exercício pelo usuário, alteração será gravado no histórico do usuário;
-
-Basicamente tem 5 Rotas principais
-
-1. /session = Controlas as sessões de login do usuário.
-2. /users = manipula os dados do usuários
-3. /statistics = desmostrativos para uso em gráficos.
-4. /trainings = Manipulas os treinamento dos usuários
-5. /exercice = Os exercícios dentro dos treinamentos.
-
-De uma olhada na documentação para melhor entendimento.
-
-<h3>👉🏽<a href='https://wayoftheweights-docs-api.netlify.app'>Clique aqui para acessa a documentacão</a></h3>
-
-<h2 id='consideraçoesfinais'><b>5 -🥺😭 Considerações finais</b></h2>
-
-Ahhh, mas você já vai ir embora 😢 ...
-
-Com esse projeto pude entender as diferenças dos tipos de **testes** e aplicar um deles, sendo ele de integração.
-Visto isso, acho que hoje para realmente temos um software de qualidade e imprescindível criar uma cobertura de testes em suas **APIs**. Creio que como typescript dificilmente vou abandonar essa pratica também. Obrigado a todos!
-🤗🙋‍♂️!
-
-### Autor ✍🏻
----
-
-
-![avatar](https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/80895578?v=4?v=4&h=100&w=100&fit=cover&mask=circle&maxage=7d
-)
-
- <sub><b>Joao Guilherme</b></sub></h4> <a href="https://github.com/JoaoG23/">🚀</a>
+<sub><b>Joao Guilherme</b></sub> <a href="https://github.com/JoaoG23/">🚀</a>
 
 Feito com 🤭 por Joao Guilherme 👋🏽 Entre em contato!
 
 [![Linkedin Badge](https://img.shields.io/badge/-Joao-blue?style=flat-square&logo=Linkedin&logoColor=white&link=https://www.linkedin.com/in/jaoo/)](https://www.linkedin.com/in/joaog123/)
 [![Badge](https://img.shields.io/badge/-joaoguilherme94@live.com-c80?style=flat-square&logo=Microsoft&logoColor=white&link=mailto:joaoguilherme94@live.com)](mailto:joaoguilherme94@live.com)
 
-<h2 id='licenca'><b>7 - Licença</b></h2>
+## Licença
 
 [![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](./LICENSE)

@@ -8,6 +8,8 @@ const TAMANHO_ANILHA = 360;
 const DESLOCAMENTO_VERTICAL = 14;
 const ROTACAO_GRAUS = 6;
 const DURACAO_MS = 5000;
+// Visível o bastante para aparecer atrás dos cards translúcidos e dos campos.
+const OPACIDADE_FUNDO = 0.18;
 
 // Respeita a opção "reduzir movimento" do sistema (acessibilidade).
 const useReduzirMovimento = () => {
@@ -78,15 +80,15 @@ export const DecoracaoFundo = () => {
 };
 
 const styles = StyleSheet.create({
-  // Plano de fundo puro: camada absoluta, recortada e sem participar do layout.
-  container: { ...StyleSheet.absoluteFillObject, overflow: "hidden" },
-  // Centralizada por posição absoluta (não empurra nem é empurrada pelo conteúdo).
-  anilha: {
+  // Camada absoluta atrás do conteúdo: não participa do layout das telas.
+  container: {
     position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginTop: -TAMANHO_ANILHA / 2,
-    marginLeft: -TAMANHO_ANILHA / 2,
-    opacity: 0.1,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
   },
+  anilha: { opacity: OPACIDADE_FUNDO },
 });

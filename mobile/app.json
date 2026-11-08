@@ -42,7 +42,14 @@
           }
         }
       ],
-      "expo-status-bar"
+      "expo-status-bar",
+      "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Permite entrar no app com o reconhecimento facial."
+        }
+      ]
     ]
   }
 }

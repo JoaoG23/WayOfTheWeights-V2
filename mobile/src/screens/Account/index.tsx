@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
@@ -10,6 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../../contexts/AuthContext";
 import { NOME_PERFIL_PLURAL, PERFIS } from "../../helpers/perfis/perfis";
 import { buscarMinhaConta, buscarPlanoConta } from "./api";
+import { biometriaAtivada, desativarBiometria } from "../../services/biometria";
 import { cores } from "../../theme/cores";
 import type { TNavigationScreenProps } from "../../Routes";
 
@@ -18,6 +20,16 @@ const NOMES_PLANOS = { BASICO: "Básico", BETA: "Beta" };
 export const Account = () => {
   const navigation = useNavigation<TNavigationScreenProps>();
   const { sair } = useAuth();
+  const [biometriaLigada, setBiometriaLigada] = useState(false);
+
+  useEffect(() => {
+    biometriaAtivada().then(setBiometriaLigada);
+  }, []);
+
+  const desligarBiometria = async () => {
+    await desativarBiometria();
+    setBiometriaLigada(false);
+  };
 
   const {
     data: conta,
@@ -73,6 +85,13 @@ export const Account = () => {
             <Button
               title="Usuários da conta"
               onPress={() => navigation.navigate("Users")}
+            />
+          )}
+          {biometriaLigada && (
+            <Button
+              title="Desativar login por biometria"
+              variant="neutral"
+              onPress={desligarBiometria}
             />
           )}
           <Button title="Sair da conta" variant="danger" onPress={sair} />

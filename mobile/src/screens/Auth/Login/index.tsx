@@ -1,9 +1,11 @@
+import { useCallback, useEffect, useState } from "react";
 import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigation } from "@react-navigation/native";
@@ -13,6 +15,13 @@ import { Input } from "../../../components/Input/Input";
 import { Button } from "../../../components/Button";
 import { AuthLayout } from "../components/AuthLayout";
 import { DadosLogin, useAuth } from "../../../contexts/AuthContext";
+import {
+  biometriaAtivada,
+  biometriaDisponivel,
+  desativarBiometria,
+  obterCredenciaisComBiometria,
+  oferecerAtivarBiometria,
+} from "../../../services/biometria";
 import { obterMensagemErro } from "../../../helpers/obterMensagemErro/obterMensagemErro";
 import { cores } from "../../../theme/cores";
 import type { TNavigationScreenProps } from "../../../Routes";
@@ -27,7 +36,11 @@ export const Login = () => {
   // Ao entrar, o AuthContext guarda o usuário e as rotas trocam sozinhas
   // para o app logado.
   const { mutate: fazerLogin, isPending } = useMutation({
-    mutationFn: entrar,
+    mutationFn: async (dadosLogin: DadosLogin) => {
+      await entrar(dadosLogin);
+      // Já logado: oferece guardar as credenciais para os próximos acessos.
+      oferecerAtivarBiometria(dadosLogin);
+    },
     onError: (erro) => {
       Toast.show({
         type: "error",
@@ -36,6 +49,35 @@ export const Login = () => {
       });
     },
   });
+
+  const [biometriaPronta, setBiometriaPronta] = useState(false);
+
+  const entrarComBiometria = useCallback(async () => {
+    const credenciais = await obterCredenciaisComBiometria();
+    if (!credenciais) return;
+    try {
+      await entrar(credenciais);
+    } catch (erro) {
+      // Senha trocada ou conta alterada: as credenciais guardadas não servem mais.
+      await desativarBiometria();
+      setBiometriaPronta(false);
+      Toast.show({
+        type: "error",
+        text1: "Biometria desativada",
+        text2: obterMensagemErro(erro, "Entre com email e senha novamente"),
+      });
+    }
+  }, [entrar]);
+
+  // Se a biometria está ativa, já pede a digital/rosto ao abrir a tela.
+  useEffect(() => {
+    const prepararBiometria = async () => {
+      const pronta = (await biometriaDisponivel()) && (await biometriaAtivada());
+      setBiometriaPronta(pronta);
+      if (pronta) entrarComBiometria();
+    };
+    prepararBiometria();
+  }, [entrarComBiometria]);
 
   return (
     <AuthLayout
@@ -72,6 +114,13 @@ export const Login = () => {
         required="Informe sua senha"
       />
 
+      {biometriaPronta && !isPending && (
+        <TouchableOpacity style={styles.botaoBiometria} onPress={entrarComBiometria}>
+          <Ionicons name="finger-print" size={28} color={cores.textoEscuro} />
+          <Text style={styles.link}>Entrar com biometria</Text>
+        </TouchableOpacity>
+      )}
+
       {isPending ? (
         <ActivityIndicator size="large" color={cores.textoEscuro} />
       ) : (
@@ -86,6 +135,13 @@ export const Login = () => {
 };
 
 const styles = StyleSheet.create({
+  botaoBiometria: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginBottom: 8,
+  },
   link: {
     textAlign: "center",
     color: cores.textoEscuro,
