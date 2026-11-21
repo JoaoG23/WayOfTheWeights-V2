@@ -4,7 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAuth } from "../../contexts/AuthContext";
-import { cores } from "../../theme/cores";
+import { comOpacidade, cores } from "../../theme/cores";
 import type { TNavigationScreenProps } from "../../Routes";
 
 interface AppHeaderProps {
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: cores.cartaoClaro,
+    backgroundColor: comOpacidade(cores.cartaoClaro, 0.8),
     borderRadius: 24,
     paddingHorizontal: 10,
     height: 48,

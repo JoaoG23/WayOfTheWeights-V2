@@ -21,3 +21,9 @@ export const cores = {
   textoSecundario: "#C7C7D1",
   textoEscuro: "#323240",
 };
+
+// Aplica opacidade (0 a 1) a uma cor hexadecimal de 6 dígitos (#RRGGBB).
+export const comOpacidade = (corHexadecimal: string, opacidade: number) =>
+  `${corHexadecimal}${Math.round(opacidade * 255)
+    .toString(16)
+    .padStart(2, "0")}`;

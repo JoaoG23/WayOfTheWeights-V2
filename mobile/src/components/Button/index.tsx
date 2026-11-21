@@ -1,5 +1,5 @@
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
-import { cores } from "../../theme/cores";
+import { comOpacidade, cores } from "../../theme/cores";
 
 type Props = {
   onPress: () => void;
@@ -8,11 +8,14 @@ type Props = {
   variant?: "success" | "danger" | "neutral" | "dark";
 };
 
+// Fundo dos botões com 80% de opacidade (texto sempre opaco).
+const OPACIDADE_FUNDO = 0.8;
+
 const CORES_POR_VARIANTE = {
-  success: { fundo: cores.destaque, texto: cores.textoEscuro },
-  danger: { fundo: cores.perigo, texto: cores.texto },
-  neutral: { fundo: cores.cartaoClaro, texto: cores.texto },
-  dark: { fundo: cores.fundo, texto: cores.texto },
+  success: { fundo: comOpacidade(cores.destaque, OPACIDADE_FUNDO), texto: cores.textoEscuro },
+  danger: { fundo: comOpacidade(cores.perigo, OPACIDADE_FUNDO), texto: cores.texto },
+  neutral: { fundo: comOpacidade(cores.cartaoClaro, OPACIDADE_FUNDO), texto: cores.texto },
+  dark: { fundo: comOpacidade(cores.fundo, OPACIDADE_FUNDO), texto: cores.texto },
 };
 
 export const Button = ({ onPress, title, variant = "success" }: Props) => {
