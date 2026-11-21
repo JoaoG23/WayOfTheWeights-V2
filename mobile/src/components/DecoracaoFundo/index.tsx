@@ -6,7 +6,6 @@ import { cores } from "../../theme/cores";
 
 const TAMANHO_ANILHA = 360;
 const DESLOCAMENTO_VERTICAL = 14;
-const ROTACAO_GRAUS = 6;
 const DURACAO_MS = 5000;
 // Visível o bastante para aparecer atrás dos cards translúcidos e dos campos.
 const OPACIDADE_FUNDO = 0.18;
@@ -59,16 +58,10 @@ export const DecoracaoFundo = () => {
     inputRange: [0, 1],
     outputRange: [0, -DESLOCAMENTO_VERTICAL],
   });
-  const rotate = progresso.interpolate({
-    inputRange: [0, 1],
-    outputRange: [`${-ROTACAO_GRAUS}deg`, `${ROTACAO_GRAUS}deg`],
-  });
 
   return (
     <View pointerEvents="none" style={styles.container}>
-      <Animated.View
-        style={[styles.anilha, { transform: [{ translateY }, { rotate }] }]}
-      >
+      <Animated.View style={[styles.anilha, { transform: [{ translateY }] }]}>
         <MaterialCommunityIcons
           name="dumbbell"
           size={TAMANHO_ANILHA}

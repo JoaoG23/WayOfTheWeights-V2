@@ -93,6 +93,7 @@ export class GeminiService {
       process.env.GEMINI_MODEL_CONTINGENCIA ?? MODELO_CONTINGENCIA_PADRAO,
     ].filter((modelo, posicao, lista) => lista.indexOf(modelo) === posicao);
 
+
     let ultimoErro: unknown;
     for (const modelo of modelos) {
       for (let tentativa = 1; tentativa <= TENTATIVAS_POR_MODELO; tentativa++) {
@@ -108,6 +109,7 @@ export class GeminiService {
           });
           return resposta.text;
         } catch (erro) {
+          console.log('erro', erro);
           if (!ehErroTemporario(erro)) throw erro;
           ultimoErro = erro;
           this.logger.warn(`Gemini (${modelo}) indisponível, tentativa ${tentativa}/${TENTATIVAS_POR_MODELO}`);
