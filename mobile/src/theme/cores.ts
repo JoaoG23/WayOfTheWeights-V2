@@ -1,7 +1,7 @@
 // Paleta do Way Of The Weights (design do app e frontend v1).
 export const cores = {
   // Fundo das telas e cartões (tema escuro)
-  fundo: "#2B2B33",
+  fundo: "#232329",
   cartao: "#4A4A5E",
   cartaoClaro: "#636573",
   // Cartão com 70% de opacidade (#4A4A5E): deixa a anilha de fundo transparecer.

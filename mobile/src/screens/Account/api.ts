@@ -10,6 +10,11 @@ export interface MinhaConta {
   proprietario: boolean;
 }
 
+// Dados que o próprio usuário pode alterar no app.
+export interface DadosMinhaConta {
+  nome: string;
+}
+
 export interface PlanoConta {
   contaId: number;
   plano: "BASICO" | "BETA";
@@ -19,6 +24,13 @@ export interface PlanoConta {
 
 export const buscarMinhaConta = async (): Promise<MinhaConta> => {
   const response = await api.get<MinhaConta>("/conta");
+  return response.data;
+};
+
+export const atualizarMinhaConta = async (
+  dadosConta: DadosMinhaConta
+): Promise<MinhaConta> => {
+  const response = await api.put<MinhaConta>("/conta", dadosConta);
   return response.data;
 };
 

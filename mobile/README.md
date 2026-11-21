@@ -23,7 +23,7 @@ src/
     ├── Subtrainings/         # até 3 por treino: detalhe (exercícios), criar, editar, remover, importar por imagens
     ├── Exercises/            # todos os exercícios, criar, detalhe (carga, séries, gráfico), remover
     ├── Weights/              # aba Pesos: ranking de evolução de carga
-    └── Account/              # dados do usuário e plano da conta
+    └── Account/              # dados do usuário (editar nome) e plano da conta
 ```
 
 ## Sessão

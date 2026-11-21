@@ -81,6 +81,11 @@ export const Account = () => {
         )}
 
         <View style={styles.botoes}>
+          <Button
+            title="Editar nome"
+            variant="neutral"
+            onPress={() => navigation.navigate("EditAccount")}
+          />
           {conta.perfil === "ADMINISTRADOR" && (
             <Button
               title="Usuários da conta"

@@ -43,6 +43,7 @@ import {
 } from "./screens/Exercises";
 import { Weights } from "./screens/Weights";
 import { Account } from "./screens/Account";
+import { EditAccount } from "./screens/Account/EditAccount";
 import { Users, AddUser, RemoveUser } from "./screens/Users";
 import { cores } from "./theme/cores";
 
@@ -60,6 +61,7 @@ export type TScreenDefinition = {
   ResetPassword: { email: string };
   Main: NavigatorScreenParams<TTabDefinition>;
   Account: undefined;
+  EditAccount: undefined;
   Users: undefined;
   AddUser: undefined;
   RemoveUser: { id: number; nome: string };
@@ -189,6 +191,7 @@ export const AppRoutes = () => {
               options={{ headerShown: false }}
             />
             <Stack.Screen name="Account" component={Account} />
+            <Stack.Screen name="EditAccount" component={EditAccount} />
             <Stack.Screen name="Users" component={Users} />
             <Stack.Screen name="AddUser" component={AddUser} />
             <Stack.Screen name="RemoveUser" component={RemoveUser} />

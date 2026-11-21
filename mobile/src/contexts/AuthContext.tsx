@@ -28,6 +28,8 @@ interface AuthContextValue {
   carregandoSessao: boolean;
   entrar: (dadosLogin: DadosLogin) => Promise<void>;
   sair: () => Promise<void>;
+  // Atualiza dados do usuário da sessão sem novo login (ex.: nome editado).
+  atualizarUsuario: (dados: Partial<UsuarioSessao>) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -70,8 +72,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [queryClient]);
 
+  const atualizarUsuario = useCallback((dados: Partial<UsuarioSessao>) => {
+    setUsuario((usuarioAtual) =>
+      usuarioAtual ? { ...usuarioAtual, ...dados } : usuarioAtual
+    );
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ usuario, carregandoSessao, entrar, sair }}>
+    <AuthContext.Provider
+      value={{ usuario, carregandoSessao, entrar, sair, atualizarUsuario }}
+    >
       {children}
     </AuthContext.Provider>
   );
