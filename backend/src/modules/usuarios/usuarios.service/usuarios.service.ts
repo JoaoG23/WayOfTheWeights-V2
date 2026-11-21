@@ -189,6 +189,7 @@ export class UsuariosService {
     perfil: PerfilUsuario;
     ativo: boolean;
     proprietario: boolean;
+    fotoArquivo?: string | null;
     criadoEm: Date;
     atualizadoEm: Date;
   }): UsuarioRespostaDto {
@@ -200,6 +201,7 @@ export class UsuariosService {
       perfil,
       ativo,
       proprietario,
+      fotoArquivo,
       criadoEm,
       atualizadoEm,
     } = usuario;
@@ -211,6 +213,7 @@ export class UsuariosService {
       perfil,
       ativo,
       proprietario,
+      fotoVersao: fotoArquivo ?? null,
       criadoEm,
       atualizadoEm,
     };

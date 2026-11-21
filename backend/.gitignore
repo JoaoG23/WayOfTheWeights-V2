@@ -3,6 +3,9 @@
 /node_modules
 /build
 
+# Fotos e outros arquivos enviados pelos usuários
+/uploads
+
 # Logs
 logs
 *.log
@@ -41,6 +44,7 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 .env.local
+.env.prod
 
 # temp directory
 .temp

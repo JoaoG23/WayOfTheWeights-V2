@@ -66,6 +66,8 @@ model Usuario {
   // desativado nem ter o perfil alterado (UsuariosService), para a conta
   // nunca ficar sem administrador.
   proprietario Boolean       @default(false)
+  // Nome do arquivo da foto de perfil na pasta de uploads (nulo = sem foto).
+  fotoArquivo  String?       @map("foto_arquivo")
   criadoEm     DateTime      @default(now()) @map("criado_em")
   atualizadoEm DateTime      @updatedAt @map("atualizado_em")
 

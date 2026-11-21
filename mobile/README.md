@@ -23,7 +23,7 @@ src/
     ├── Subtrainings/         # até 3 por treino: detalhe (exercícios), criar, editar, remover, importar por imagens
     ├── Exercises/            # todos os exercícios, criar, detalhe (carga, séries, gráfico), remover
     ├── Weights/              # aba Pesos: ranking de evolução de carga
-    └── Account/              # dados do usuário (editar nome) e plano da conta
+    └── Account/              # dados do usuário (editar nome, foto de perfil) e plano da conta
 ```
 
 ## Sessão
@@ -35,6 +35,10 @@ O login grava o cookie httpOnly `jwt` (definido pelo backend). O networking nati
 No detalhe do subtreino, o ícone verde de checklist inicia o treino: cada toque num exercício o marca ou desmarca. Quando **todos** os exercícios estão marcados, o app registra a conclusão (`POST /treinos/:id/subtreinos/:id/conclusoes`), avisa "Treino concluído!" e sai do modo checklist. Também dá para finalizar **parcialmente**: com ao menos um exercício marcado aparece o botão "Finalizar com X de Y", e só os marcados entram no histórico (aparece como "Parcial" no calendário). Se o app for fechado antes de marcar todos, a marcação parcial é perdida (nada é salvo até concluir).
 
 O dashboard (aba Dashboard) mostra os **treinos da semana** em formato de calendário: cada dia (segunda a domingo) lista os treinos concluídos, com o nome do treino, o subtreino e a data/hora. As setas navegam entre semanas (até a semana atual); os dados vêm de `GET /conclusoes`.
+
+## Foto de perfil
+
+Na tela Conta, tocar no avatar abre as opções: escolher da galeria, tirar foto ou remover. A imagem é recortada em quadrado e enviada ao backend (`PUT /conta/foto`, até 2 MB), que a guarda em disco. O app exibe a foto com `<Image>` apontando para `GET /conta/foto?v=<fotoVersao>`; a sessão por cookie é enviada pela rede nativa, como nas demais chamadas.
 
 ## Importar subtreino por imagens (OCR)
 

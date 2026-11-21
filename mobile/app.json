@@ -53,8 +53,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Permite escolher fotos da sua ficha de treino para importar.",
-          "cameraPermission": "Permite fotografar a sua ficha de treino para importar."
+          "photosPermission": "Permite escolher fotos para a ficha de treino e para o seu perfil.",
+          "cameraPermission": "Permite fotografar a ficha de treino e o seu perfil."
         }
       ]
     ]

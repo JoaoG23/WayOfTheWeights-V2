@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 
 import { Card } from "../../components/Card";
+import { AvatarEditavel } from "./components/AvatarEditavel";
 import { Button } from "../../components/Button";
 import { Carregando, MensagemTela } from "../../components/Feedback";
 import { DecoracaoFundo } from "../../components/DecoracaoFundo";
@@ -51,9 +51,7 @@ export const Account = () => {
       <DecoracaoFundo />
       <ScrollView contentContainerStyle={styles.conteudo}>
         <View style={styles.perfil}>
-          <View style={styles.avatar}>
-            <Ionicons name="person" size={44} color={cores.textoEscuro} />
-          </View>
+          <AvatarEditavel fotoVersao={conta.fotoVersao} />
           <Text style={styles.nome}>{conta.nome}</Text>
           <Text style={styles.email}>{conta.email}</Text>
           <View style={styles.chipPerfil}>
@@ -110,15 +108,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: cores.fundo },
   conteudo: { padding: 16, paddingBottom: 32 },
   perfil: { alignItems: "center", marginVertical: 20, gap: 6 },
-  avatar: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
-    backgroundColor: cores.destaque,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 8,
-  },
   nome: { fontSize: 22, fontWeight: "bold", color: cores.texto },
   email: { fontSize: 14, color: cores.textoSecundario },
   chipPerfil: {

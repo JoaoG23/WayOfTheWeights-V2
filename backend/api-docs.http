@@ -57,6 +57,23 @@ Content-Type: application/json
 ### Minha conta
 GET {{baseUrl}}/conta
 
+### Foto de perfil: devolve a imagem (use ?v=<fotoVersao> do GET /conta para cache)
+GET {{baseUrl}}/conta/foto
+
+### Enviar/trocar a foto (campo "foto": jpeg, png ou webp, até 2 MB)
+PUT {{baseUrl}}/conta/foto
+Content-Type: multipart/form-data; boundary=limite
+
+--limite
+Content-Disposition: form-data; name="foto"; filename="foto.jpg"
+Content-Type: image/jpeg
+
+< ./foto.jpg
+--limite--
+
+### Remover a foto
+DELETE {{baseUrl}}/conta/foto
+
 ### Atualizar minha conta
 PUT {{baseUrl}}/conta
 Content-Type: application/json

@@ -20,6 +20,7 @@ src/
     ├── treinos/             # /treinos
     ├── subtreinos/          # /treinos/:treinoId/subtreinos (até 3 por treino)
     ├── importacao-subtreinos/ # /treinos/:treinoId/subtreinos/ocr e /:id/importar (leitura de imagens com Gemini + upsert)
+    ├── fotos-usuario/       # /conta/foto — foto de perfil guardada em disco
     ├── conclusoes/          # /treinos/:treinoId/subtreinos/:subtreinoId/conclusoes e /conclusoes (checklist e histórico)
     ├── exercicios/          # /treinos/:treinoId/subtreinos/:subtreinoId/exercicios (+ /historico)
     ├── series/              # /treinos/:treinoId/subtreinos/:subtreinoId/exercicios/:exercicioId/series
@@ -93,6 +94,16 @@ Regras do upsert:
 
 Configuração no `.env`: `GEMINI_API_KEY` (crie em https://aistudio.google.com/api-keys) e, opcionalmente, `GEMINI_MODEL` (padrão `gemini-3.8-flash`). Se o Gemini responder erro temporário (503/429/5xx), o backend tenta de novo 3 vezes com espera crescente e depois usa `GEMINI_MODEL_CONTINGENCIA` (padrão `gemini-2.5-flash`); esgotado, responde 502. Sem a chave, o OCR responde 503; a importação do JSON funciona normalmente.
 
+## Foto de perfil
+
+Cada usuário tem uma foto, guardada **no disco do servidor** (pasta `UPLOADS_DIR`, padrão `./uploads/fotos`, fora do git); o banco guarda só o nome do arquivo (`usuarios.foto_arquivo`).
+
+- `PUT /conta/foto` — `multipart/form-data`, campo **`foto`** (jpeg, png ou webp, até 2 MB; o conteúdo é conferido pelos primeiros bytes). Cada envio cria um arquivo novo e apaga o anterior.
+- `GET /conta/foto` — devolve a imagem (exige login). `GET /conta` traz `fotoVersao` (nome do arquivo, ou nulo); o app usa como `?v=` na URL, e por isso a resposta tem cache longo.
+- `DELETE /conta/foto` — remove a foto.
+
+Em produção, a pasta de uploads precisa ser um disco **persistente** (volume) e entrar no backup, e com várias instâncias da API o armazenamento precisa ser compartilhado.
+
 ## Conclusão de treino (checklist e histórico)
 
 O usuário marca no app os exercícios que fez dentro de um subtreino e finaliza o checklist (automaticamente ao marcar **todos**, ou manualmente com só **alguns**, o que gera uma conclusão **parcial**). O app chama `POST /treinos/:treinoId/subtreinos/:subtreinoId/conclusoes` com `{ "exerciciosConcluidosIds": [...] }`:
@@ -121,6 +132,40 @@ npm run start:dev
 ```
 
 Requisições de exemplo em [api-docs.http](./api-docs.http).
+
+## Docker (build, deploy e CI/CD)
+
+O backend roda em container; o **banco não sobe junto**: a `DATABASE_URL` aponta para o banco de testes do servidor. As fotos de perfil ficam numa pasta do servidor mapeada como volume.
+
+Arquivos: [Dockerfile](./Dockerfile) (build em estágios), [docker-compose.yml](./docker-compose.yml) e [.env.prod.example](./.env.prod.example).
+
+```bash
+cp .env.prod.example .env.prod          # preencha DATABASE_URL, JWT_SECRET, SMTP_*...
+mkdir -p uploads && sudo chown -R 1000:1000 uploads   # o container roda como o usuário "node" (uid 1000)
+docker compose up -d --build            # migra o banco (serviço "migrar") e sobe a API
+```
+
+- **Migrations:** o serviço `migrar` roda `prisma migrate deploy` e termina; a API só sobe depois que ele conclui com sucesso.
+- **Fotos:** `UPLOADS_HOST_DIR` (padrão `./uploads`) é montado em `/app/uploads`. Inclua essa pasta no backup.
+- **Banco no próprio servidor:** use `host.docker.internal` como host na `DATABASE_URL` (o compose já mapeia para o host). Se o banco exigir SSL, acrescente `?sslmode=require`.
+- **Cookie de sessão:** com `NODE_ENV=production` o cookie só funciona em HTTPS. Se o servidor de testes responde em HTTP puro, use `NODE_ENV=development` no `.env.prod`.
+- **Porta:** a API usa a 3001 por padrão. Para trocar, defina `PORTA` (ex.: `PORTA=3002 docker compose up -d`, ou num arquivo `.env` ao lado do compose); vale para o container e para a porta publicada. Ajuste também a `EXPO_PUBLIC_API_URL` do app.
+- **Saúde:** a imagem tem `HEALTHCHECK` (GET /); veja com `docker compose ps`.
+
+**CI/CD** (as variáveis são lidas pelo compose):
+
+```bash
+# CI: build com cache de camadas e push da imagem versionada pelo commit
+export IMAGEM_BACKEND=registro.exemplo.com/wow/backend TAG_IMAGEM=$GITHUB_SHA COMMIT_SHA=$GITHUB_SHA
+docker compose build            # com BuildKit; o cache do npm é reaproveitado
+docker compose push
+
+# CD (no servidor): baixa a imagem e atualiza sem rebuild
+docker compose pull
+docker compose up -d --no-build
+```
+
+Para cache entre execuções do CI, use `docker buildx build --cache-from type=gha --cache-to type=gha,mode=max` no alvo `runtime`.
 
 ## Testes
 

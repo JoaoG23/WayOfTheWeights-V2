@@ -1,0 +1,69 @@
+# Backend em container. O banco de dados NÃO sobe aqui: aponte DATABASE_URL
+# (no arquivo de ambiente) para o banco de testes do servidor.
+#
+# Variáveis de ambiente do próprio compose (todas opcionais):
+#   ENV_FILE          arquivo de ambiente do container (padrão: .env.prod)
+#   IMAGEM_BACKEND    nome da imagem, ex.: registro.exemplo.com/wow/backend
+#   TAG_IMAGEM        tag da imagem, ex.: o SHA do commit (padrão: latest)
+#   COMMIT_SHA        gravado no label da imagem
+#   PORTA             porta da API, dentro do container e no servidor (padrão: 3001)
+#   UPLOADS_HOST_DIR  pasta do servidor onde ficam as fotos (padrão: ./uploads)
+name: wayoftheweights
+
+x-ambiente: &ambiente
+  env_file: ${ENV_FILE:-.env.prod}
+  # Banco instalado no próprio servidor: use host.docker.internal na
+  # DATABASE_URL para alcançá-lo de dentro do container.
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+
+services:
+  # Aplica as migrations antes de a API subir e termina. Num deploy: CI faz
+  # build + push; CD faz "pull" e "up -d" (o compose roda este passo antes).
+  migrar:
+    <<: *ambiente
+    image: ${IMAGEM_BACKEND:-wayoftheweights-backend}-migracao:${TAG_IMAGEM:-latest}
+    build:
+      context: .
+      target: migracao
+    restart: "no"
+
+  backend:
+    <<: *ambiente
+    image: ${IMAGEM_BACKEND:-wayoftheweights-backend}:${TAG_IMAGEM:-latest}
+    build:
+      context: .
+      target: runtime
+      args:
+        COMMIT_SHA: ${COMMIT_SHA:-desconhecido}
+    depends_on:
+      migrar:
+        condition: service_completed_successfully
+    environment:
+      PORT: "${PORTA:-3001}"
+      UPLOADS_DIR: /app/uploads
+    ports:
+      - "${PORTA:-3001}:${PORTA:-3001}"
+    volumes:
+      # Fotos de perfil no disco do servidor. O container roda como o usuário
+      # "node" (uid 1000): a pasta precisa ser gravável por ele
+      # (chown -R 1000:1000 <pasta>).
+      - ${UPLOADS_HOST_DIR:-./uploads}:/app/uploads
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    # Endurecimento: sistema de arquivos somente leitura (só /tmp e o volume
+    # de uploads são graváveis), sem privilégios extras.
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

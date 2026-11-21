@@ -1,8 +1,31 @@
+# Fora do contexto de build: menor contexto, build mais rápido e sem vazar
+# segredos nem dados de usuários para dentro da imagem.
 node_modules
 dist
 coverage
 test
-.env
-.env.example
-.env.prod
 *.log
+
+# Segredos e configuração local
+.env
+.env.*
+!.env.example
+!.env.prod.example
+
+# Fotos enviadas pelos usuários (ficam no volume, nunca na imagem)
+uploads
+
+# Controle de versão, editor e documentação
+.git
+.gitignore
+.claude
+.eslintrc.js
+.prettierrc
+.prettierignore
+README.md
+api-docs.http
+
+# Arquivos de container não entram na própria imagem
+Dockerfile
+docker-compose*.yml
+.dockerignore

@@ -8,6 +8,9 @@ export class UsuarioRespostaDto {
   perfil: PerfilUsuario;
   ativo: boolean;
   proprietario: boolean;
+  // Versão da foto de perfil (nome do arquivo); nulo se não tem foto. A imagem
+  // vem de GET /conta/foto?v=<fotoVersao>.
+  fotoVersao: string | null;
   criadoEm: Date;
   atualizadoEm: Date;
 }
