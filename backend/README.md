@@ -133,6 +133,21 @@ npm run start:dev
 
 Requisições de exemplo em [api-docs.http](./api-docs.http).
 
+## Docker em desenvolvimento
+
+[docker-compose.dev.yml](./docker-compose.dev.yml) sobe a API com hot reload e um Postgres local em container:
+
+```bash
+cp .env.example .env                                   # JWT_SECRET, SMTP_*, GEMINI_*
+docker compose -f docker-compose.dev.yml up --build    # API em http://localhost:3000
+```
+
+- O container gera o client do Prisma, aplica as migrations (`migrate deploy`) e roda `nest start --watch`. O código vem do host por volume, então editar um arquivo reinicia a API.
+- O banco usa o serviço `db` (a `DATABASE_URL` do `.env` é ignorada). Fica acessível no seu computador em `localhost:5433` (`PORTA_BANCO`) com usuário/senha `admin`/`admin`; os dados ficam no volume `dados-banco`.
+- As fotos de perfil ficam em `./uploads` do projeto. `PORTA` troca a porta da API.
+- `node_modules` é do próprio container (volume). Se mudar o `package-lock.json`, recrie com `docker compose -f docker-compose.dev.yml down -v` (apaga também o banco de dev) ou rode `docker compose -f docker-compose.dev.yml exec backend npm ci`.
+- Criar uma migration nova continua pelo comando de sempre, dentro do container: `docker compose -f docker-compose.dev.yml exec backend npx prisma migrate dev --name <nome>`.
+
 ## Docker (build, deploy e CI/CD)
 
 O backend roda em container; o **banco não sobe junto**: a `DATABASE_URL` aponta para o banco de testes do servidor. As fotos de perfil ficam numa pasta do servidor mapeada como volume.

@@ -1,0 +1,67 @@
+# Ambiente de DESENVOLVIMENTO: API com hot reload (nest start --watch) e um
+# Postgres local em container, tudo com um comando:
+#
+#   docker compose -f docker-compose.dev.yml up --build
+#
+# Pré-requisito: copiar .env.example para .env (JWT_SECRET, SMTP_*, GEMINI_*).
+# A DATABASE_URL do .env é ignorada aqui: o container usa o banco "db" abaixo.
+#
+# Variáveis opcionais (shell ou arquivo .env ao lado deste compose):
+#   PORTA              porta da API (padrão: 3000)
+#   PORTA_BANCO        porta do Postgres publicada no seu computador (padrão: 5433,
+#                      para não colidir com um Postgres local na 5432)
+#   POSTGRES_USER / POSTGRES_PASSWORD / POSTGRES_DB   credenciais do banco de dev
+name: wayoftheweights-dev
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+      POSTGRES_DB: ${POSTGRES_DB:-db_wayoftheweights_v2}
+    ports:
+      - "${PORTA_BANCO:-5433}:5432"
+    volumes:
+      - dados-banco:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-db_wayoftheweights_v2}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      target: dev
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_ENV: development
+      PORT: "${PORTA:-3000}"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin}@db:5432/${POSTGRES_DB:-db_wayoftheweights_v2}?schema=public
+      # Detecta alterações nos arquivos montados do host (necessário no
+      # Docker Desktop do Windows/Mac).
+      TSC_WATCHFILE: PriorityPollingInterval
+    depends_on:
+      db:
+        condition: service_healthy
+    # Gera o client do Prisma, aplica as migrations e sobe em modo watch.
+    command: >
+      sh -c "npx prisma generate &&
+             npx prisma migrate deploy &&
+             npm run start:dev"
+    ports:
+      - "${PORTA:-3000}:${PORTA:-3000}"
+    volumes:
+      # Código do host (hot reload). As fotos ficam em ./uploads do projeto.
+      - .:/app
+      # node_modules do Linux do container, sem usar o do host (bcrypt é nativo).
+      - node-modules:/app/node_modules
+    restart: unless-stopped
+
+volumes:
+  dados-banco:
+  node-modules:

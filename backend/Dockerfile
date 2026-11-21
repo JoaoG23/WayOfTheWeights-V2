@@ -7,6 +7,7 @@
 # Alvos:
 #   runtime   -> API (padrão de produção)
 #   migracao  -> executa "prisma migrate deploy" e termina
+#   dev       -> desenvolvimento com hot reload (docker-compose.dev.yml)
 ARG NODE_VERSION=22
 
 FROM node:${NODE_VERSION}-bookworm-slim AS base
@@ -17,6 +18,12 @@ WORKDIR /app
 FROM base AS deps
 COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts
+
+# Desenvolvimento (docker-compose.dev.yml): só as dependências; o código vem
+# do host por volume e roda com hot reload.
+FROM deps AS dev
+ENV NODE_ENV=development
+CMD ["npm", "run", "start:dev"]
 
 # Compila o TypeScript (gera antes o client do Prisma em src/generated).
 FROM deps AS build
