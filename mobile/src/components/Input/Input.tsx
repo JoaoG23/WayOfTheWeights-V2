@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
   inputPreenchido: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: cores.cartao,
+    backgroundColor: cores.cartaoTranslucido,
     borderRadius: 14,
     borderWidth: 1.5,
     borderColor: "transparent",

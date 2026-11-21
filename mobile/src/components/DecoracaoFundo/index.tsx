@@ -5,6 +5,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { cores } from "../../theme/cores";
 
 const TAMANHO_ANILHA = 360;
+const TAMANHO_COPIA = 90;
 const DESLOCAMENTO_VERTICAL = 28;
 const DURACAO_MS = 5000;
 // Visível o bastante para aparecer atrás dos cards translúcidos e dos campos.
@@ -67,6 +68,13 @@ export const DecoracaoFundo = () => {
           size={TAMANHO_ANILHA}
           color={cores.destaque}
         />
+        {/* Cópia menor no canto do peso grande; flutua junto com ele. */}
+        <MaterialCommunityIcons
+          name="dumbbell"
+          size={TAMANHO_COPIA}
+          color={cores.destaque}
+          style={styles.copia}
+        />
       </Animated.View>
     </View>
   );
@@ -84,4 +92,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   anilha: { opacity: OPACIDADE_FUNDO },
+  copia: { position: "absolute", top: -24, right: -36 },
 });
