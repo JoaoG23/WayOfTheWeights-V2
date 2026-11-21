@@ -152,32 +152,32 @@ docker compose -f docker-compose.dev.yml up --build    # API em http://localhost
 
 O backend roda em container; o **banco não sobe junto**: a `DATABASE_URL` aponta para o banco de testes do servidor. As fotos de perfil ficam numa pasta do servidor mapeada como volume.
 
-Arquivos: [Dockerfile](./Dockerfile) (build em estágios), [docker-compose.yml](./docker-compose.yml) e [.env.prod.example](./.env.prod.example).
+Arquivos: [Dockerfile](./Dockerfile) (build em estágios), [docker-compose.yml](./docker-compose.yml), [deploy.sh](./deploy.sh) e [.env.prod.example](./.env.prod.example). O compose está no formato `3.7`, então roda tanto no `docker-compose` v1 quanto no `docker compose` v2 (não exige atualizar o Compose do servidor).
 
 ```bash
 cp .env.prod.example .env.prod          # preencha DATABASE_URL, JWT_SECRET, SMTP_*...
 mkdir -p uploads && sudo chown -R 1000:1000 uploads   # o container roda como o usuário "node" (uid 1000)
-docker compose up -d --build            # migra o banco (serviço "migrar") e sobe a API
+chmod +x deploy.sh && ./deploy.sh       # build, migrations e sobe a API
 ```
 
-- **Migrations:** o serviço `migrar` roda `prisma migrate deploy` e termina; a API só sobe depois que ele conclui com sucesso.
+- **Deploy:** o `deploy.sh` faz build (ou `--pull`), roda as migrations (`run --rm migrar`, que aplica `prisma migrate deploy`) e só então sobe a API. Se a migration falhar, o script para e a API anterior continua no ar.
+- **BuildKit:** o Dockerfile usa cache do npm, que exige BuildKit. O script liga `DOCKER_BUILDKIT` e `COMPOSE_DOCKER_CLI_BUILD` só na própria execução, sem mexer na configuração do servidor. Se você rodar o compose à mão no v1, exporte as duas variáveis antes.
 - **Fotos:** `UPLOADS_HOST_DIR` (padrão `./uploads`) é montado em `/app/uploads`. Inclua essa pasta no backup.
-- **Banco no próprio servidor:** use `host.docker.internal` como host na `DATABASE_URL` (o compose já mapeia para o host). Se o banco exigir SSL, acrescente `?sslmode=require`.
+- **Banco no próprio servidor:** use `host.docker.internal` como host na `DATABASE_URL` (o compose já mapeia para o host; precisa do Docker 20.10+, senão use o IP do servidor). Se o banco exigir SSL, acrescente `?sslmode=require`.
 - **Cookie de sessão:** com `NODE_ENV=production` o cookie só funciona em HTTPS. Se o servidor de testes responde em HTTP puro, use `NODE_ENV=development` no `.env.prod`.
-- **Porta:** a API usa a 3001 por padrão. Para trocar, defina `PORTA` (ex.: `PORTA=3002 docker compose up -d`, ou num arquivo `.env` ao lado do compose); vale para o container e para a porta publicada. Ajuste também a `EXPO_PUBLIC_API_URL` do app.
-- **Saúde:** a imagem tem `HEALTHCHECK` (GET /); veja com `docker compose ps`.
+- **Porta:** a API usa a 3001 por padrão. Para trocar, defina `PORTA` (ex.: `PORTA=3002 ./deploy.sh`, ou num arquivo `.env` ao lado do compose); vale para o container e para a porta publicada. Ajuste também a `EXPO_PUBLIC_API_URL` do app.
+- **Saúde:** a imagem tem `HEALTHCHECK` (GET /); veja com `docker ps`.
 
 **CI/CD** (as variáveis são lidas pelo compose):
 
 ```bash
 # CI: build com cache de camadas e push da imagem versionada pelo commit
 export IMAGEM_BACKEND=registro.exemplo.com/wow/backend TAG_IMAGEM=$GITHUB_SHA COMMIT_SHA=$GITHUB_SHA
-docker compose build            # com BuildKit; o cache do npm é reaproveitado
-docker compose push
+DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker-compose build
+docker-compose push
 
-# CD (no servidor): baixa a imagem e atualiza sem rebuild
-docker compose pull
-docker compose up -d --no-build
+# CD (no servidor): baixa a imagem, migra e sobe sem rebuild
+./deploy.sh --pull
 ```
 
 Para cache entre execuções do CI, use `docker buildx build --cache-from type=gha --cache-to type=gha,mode=max` no alvo `runtime`.

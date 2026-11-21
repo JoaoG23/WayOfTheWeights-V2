@@ -1,25 +1,29 @@
 # Backend em container. O banco de dados NÃO sobe aqui: aponte DATABASE_URL
-# (no arquivo de ambiente) para o banco de testes do servidor.
+# (no arquivo .env.prod) para o banco de testes do servidor.
+#
+# Formato 3.7: funciona no docker-compose v1 e no "docker compose" v2.
+# Para subir, use o deploy.sh (ele roda as migrations antes da API).
 #
 # Variáveis de ambiente do próprio compose (todas opcionais):
-#   ENV_FILE          arquivo de ambiente do container (padrão: .env.prod)
 #   IMAGEM_BACKEND    nome da imagem, ex.: registro.exemplo.com/wow/backend
 #   TAG_IMAGEM        tag da imagem, ex.: o SHA do commit (padrão: latest)
 #   COMMIT_SHA        gravado no label da imagem
 #   PORTA             porta da API, dentro do container e no servidor (padrão: 3001)
 #   UPLOADS_HOST_DIR  pasta do servidor onde ficam as fotos (padrão: ./uploads)
-name: wayoftheweights
+version: "3.7"
 
 x-ambiente: &ambiente
-  env_file: ${ENV_FILE:-.env.prod}
+  env_file: .env.prod
   # Banco instalado no próprio servidor: use host.docker.internal na
-  # DATABASE_URL para alcançá-lo de dentro do container.
+  # DATABASE_URL para alcançá-lo de dentro do container (Docker 20.10+).
+  # Se o seu Docker for mais antigo, use o IP do servidor na DATABASE_URL.
   extra_hosts:
     - "host.docker.internal:host-gateway"
 
 services:
-  # Aplica as migrations antes de a API subir e termina. Num deploy: CI faz
-  # build + push; CD faz "pull" e "up -d" (o compose roda este passo antes).
+  # Aplica as migrations e termina. Não é dependência da API de propósito: o
+  # deploy.sh roda "run --rm migrar" ANTES de subir a API (o formato 3.7 não
+  # sabe esperar um serviço terminar).
   migrar:
     <<: *ambiente
     image: ${IMAGEM_BACKEND:-wayoftheweights-backend}-migracao:${TAG_IMAGEM:-latest}
@@ -36,9 +40,6 @@ services:
       target: runtime
       args:
         COMMIT_SHA: ${COMMIT_SHA:-desconhecido}
-    depends_on:
-      migrar:
-        condition: service_completed_successfully
     environment:
       PORT: "${PORTA:-3001}"
       UPLOADS_DIR: /app/uploads
@@ -61,7 +62,6 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 512m
     logging:
       driver: json-file
       options:
