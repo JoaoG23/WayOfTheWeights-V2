@@ -55,8 +55,6 @@ export const Home = () => {
           <Text style={styles.saudacao}>Veja se ficou mais forte</Text>
         </View>
 
-        <SemanaTreinos />
-
         {!maiorEvolucao ? (
           <Card
             onPress={() => navigation.navigate("Main", { screen: "Treinos" })}
@@ -138,6 +136,8 @@ export const Home = () => {
             />
           </Card>
         )}
+
+        <SemanaTreinos />
       </ScrollView>
     </View>
   );

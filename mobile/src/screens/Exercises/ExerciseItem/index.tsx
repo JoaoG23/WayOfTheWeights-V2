@@ -56,7 +56,7 @@ export const ExerciseItem = React.memo(
           <MaterialCommunityIcons
             name={marcado ? "checkbox-marked-circle" : "checkbox-blank-circle-outline"}
             size={28}
-            color={marcado ? cores.sucesso : cores.neutro}
+            color={marcado ? cores.destaque : cores.neutro}
             style={styles.checkbox}
           />
         )}

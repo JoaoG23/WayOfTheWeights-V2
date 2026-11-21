@@ -138,7 +138,7 @@ export const SubtrainingDetail = () => {
               <Feather
                 name={treinando ? "x-square" : "check-square"}
                 size={22}
-                color={cores.sucesso}
+                color={cores.destaque}
               />
             </TouchableOpacity>
           )}
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   progressoChecklist: {
     fontSize: 14,
     fontWeight: "600",
-    color: cores.sucesso,
+    color: cores.destaque,
     paddingHorizontal: 16,
     paddingBottom: 12,
   },

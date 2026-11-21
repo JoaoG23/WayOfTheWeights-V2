@@ -92,7 +92,7 @@ export const SemanaTreinos = () => {
                     <MaterialCommunityIcons
                       name="check-circle"
                       size={22}
-                      color={cores.sucesso}
+                      color={cores.destaque}
                     />
                     <View style={styles.textosConclusao}>
                       <Text style={styles.nomeTreino}>{conclusao.tituloTreino}</Text>
