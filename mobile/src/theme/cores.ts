@@ -2,10 +2,10 @@
 export const cores = {
   // Fundo das telas e cartões (tema escuro)
   fundo: "#232329",
-  cartao: "#4A4A5E",
+  cartao: "#3A3A46",
   cartaoClaro: "#636573",
-  // Cartão com 70% de opacidade (#4A4A5E): deixa a anilha de fundo transparecer.
-  cartaoTranslucido: "rgba(74, 74, 94, 0.7)",
+  // Cartão com 70% de opacidade (#3A3A46): deixa a anilha de fundo transparecer.
+  cartaoTranslucido: "rgba(58, 58, 70, 0.7)",
 
   // Destaques
   destaque: "#DCFC34",

@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: comOpacidade(cores.cartaoClaro, 0.8),
+    backgroundColor: comOpacidade(cores.cartao, 0.8),
     borderRadius: 24,
     paddingHorizontal: 10,
     height: 48,
