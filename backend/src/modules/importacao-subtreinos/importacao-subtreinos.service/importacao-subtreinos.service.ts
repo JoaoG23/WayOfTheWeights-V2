@@ -137,7 +137,6 @@ export class ImportacaoSubtreinosService {
   // garante o formato (textos aparados, números inteiros). Os limites de
   // negócio (carga 1–1500 etc.) são validados na importação.
   private normalizarLeitura(leituraBruta: unknown): SubtreinoImportacaoDto {
-    console.log('leituraBruta', leituraBruta);
     const leitura = leituraBruta as Partial<SubtreinoImportacaoDto> | null;
     const exercicios = leitura?.exercicios ?? [];
 

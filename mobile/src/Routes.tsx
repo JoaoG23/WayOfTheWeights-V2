@@ -11,6 +11,7 @@ import {
 } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAuth } from "./contexts/AuthContext";
 import { AppHeader } from "./components/AppHeader";
@@ -107,7 +108,12 @@ const temaNavegacao: Theme = {
   },
 };
 
+// Altura padrão da barra de abas do React Navigation (sem a área segura).
+const ALTURA_PADRAO_TAB_BAR = 49;
+
 const TabRoutes = () => {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tab.Navigator
       initialRouteName="Home"
@@ -125,6 +131,8 @@ const TabRoutes = () => {
         tabBarStyle: {
           backgroundColor: cores.destaque,
           borderTopWidth: 0,
+          // +3px em relação à altura padrão.
+          height: ALTURA_PADRAO_TAB_BAR + insets.bottom + 3,
         },
         tabBarActiveTintColor: cores.textoEscuro,
         tabBarInactiveTintColor: "rgba(50, 50, 64, 0.5)",
