@@ -2,8 +2,8 @@ import { ArrayMaxSize, ArrayMinSize, IsArray, IsInt } from 'class-validator';
 import { MAXIMO_EXERCICIOS_POR_SUBTREINO } from '../../../shared/constantes/limites-importacao';
 
 export class CriarConclusaoDto {
-  // Ids dos exercícios marcados no checklist. O treino só conclui se forem
-  // todos os exercícios do subtreino.
+  // Ids dos exercícios marcados no checklist: todos os do subtreino (conclusão
+  // completa) ou só alguns (conclusão parcial).
   @IsArray({ message: 'exerciciosConcluidosIds deve ser uma lista' })
   @ArrayMinSize(1, { message: 'Marque ao menos um exercício' })
   @ArrayMaxSize(MAXIMO_EXERCICIOS_POR_SUBTREINO, {

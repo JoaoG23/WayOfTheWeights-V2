@@ -14,6 +14,9 @@ export interface ConclusaoTreino {
   tituloTreino: string;
   tituloSubtreino: string;
   concluidoEm: string;
+  // Exercícios do subtreino na conclusão; `completo` quando todos foram marcados.
+  totalExercicios: number;
+  completo: boolean;
   exercicios: ExercicioConcluido[];
 }
 
@@ -30,7 +33,7 @@ export const listarConclusoes = async (
   return response.data;
 };
 
-// O backend só registra se todos os exercícios do subtreino estiverem na lista.
+// Todos os exercícios do subtreino (conclusão completa) ou só alguns (parcial).
 export const registrarConclusao = async (
   treinoId: number,
   subtreinoId: number,

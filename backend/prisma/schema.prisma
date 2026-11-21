@@ -200,8 +200,9 @@ model HistoricoCarga {
   @@map("historico_cargas")
 }
 
-// Histórico de treinos realizados: um registro por vez que o usuário marcou
-// todos os exercícios de um subtreino. Guarda cópias dos títulos e dos
+// Histórico de treinos realizados: um registro por vez que o usuário finaliza
+// o checklist de um subtreino, com todos os exercícios marcados ou só alguns
+// (conclusão parcial). Guarda cópias dos títulos e dos
 // exercícios, para o histórico continuar legível mesmo se o treino mudar.
 model ConclusaoTreino {
   id              Int       @id @default(autoincrement())
@@ -212,6 +213,9 @@ model ConclusaoTreino {
   subtreino       Subtreino? @relation(fields: [subtreinoId], references: [id], onDelete: SetNull)
   tituloTreino    String    @map("titulo_treino")
   tituloSubtreino String    @map("titulo_subtreino")
+  // Quantos exercícios o subtreino tinha na conclusão; comparado com os
+  // exercícios marcados, diz se a conclusão foi completa ou parcial.
+  totalExercicios Int       @map("total_exercicios")
   concluidoEm     DateTime  @default(now()) @map("concluido_em")
 
   exercicios ExercicioConcluido[]

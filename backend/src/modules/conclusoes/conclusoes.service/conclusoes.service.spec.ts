@@ -35,6 +35,7 @@ describe('ConclusoesService', () => {
     subtreinoId,
     tituloTreino: 'Treino 1',
     tituloSubtreino: 'Ombros',
+    totalExercicios: 2,
     concluidoEm: new Date('2026-11-06T18:00:00Z'),
     exercicios: [
       { nome: 'Desenvolvimento', cargaKg: 20 },
@@ -77,7 +78,7 @@ describe('ConclusoesService', () => {
   afterEach(() => jest.clearAllMocks());
 
   describe('criar', () => {
-    it('registra a conclusão quando todos os exercícios estão marcados', async () => {
+    it('registra a conclusão completa quando todos os exercícios estão marcados', async () => {
       const resposta = await service.criar(
         usuarioAutenticado,
         treinoId,
@@ -90,24 +91,40 @@ describe('ConclusoesService', () => {
         subtreinoId,
         tituloTreino: 'Treino 1',
         tituloSubtreino: 'Ombros',
+        totalExercicios: 2,
         exercicios: [
           { nome: 'Desenvolvimento', cargaKg: 20 },
           { nome: 'Elevação lateral', cargaKg: 8 },
         ],
       });
+      expect(resposta.completo).toBe(true);
       expect(resposta.exercicios).toEqual([
         { nome: 'Desenvolvimento', cargaAtual: 20 },
         { nome: 'Elevação lateral', cargaAtual: 8 },
       ]);
     });
 
-    it('rejeita quando falta marcar algum exercício', async () => {
-      await expect(
-        service.criar(usuarioAutenticado, treinoId, subtreinoId, {
-          exerciciosConcluidosIds: [10],
+    it('registra conclusão parcial só com os exercícios marcados', async () => {
+      conclusoesRepositories.criar!.mockResolvedValue({
+        ...conclusaoPersistida,
+        exercicios: [{ nome: 'Desenvolvimento', cargaKg: 20 }],
+      });
+
+      const resposta = await service.criar(
+        usuarioAutenticado,
+        treinoId,
+        subtreinoId,
+        { exerciciosConcluidosIds: [10, 10] },
+      );
+
+      expect(conclusoesRepositories.criar).toHaveBeenCalledWith(
+        expect.objectContaining({
+          totalExercicios: 2,
+          exercicios: [{ nome: 'Desenvolvimento', cargaKg: 20 }],
         }),
-      ).rejects.toThrow(BadRequestException);
-      expect(conclusoesRepositories.criar).not.toHaveBeenCalled();
+      );
+      expect(resposta.completo).toBe(false);
+      expect(resposta.totalExercicios).toBe(2);
     });
 
     it('rejeita ids que não são do subtreino', async () => {

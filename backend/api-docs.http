@@ -242,7 +242,7 @@ DELETE {{baseUrl}}/treinos/1/subtreinos/1/exercicios/1/series/1
 ### Conclusão de treino (checklist) e histórico
 ### ---------------------------------------------------------------------
 
-### Concluir o subtreino: só registra se TODOS os exercícios do subtreino estiverem na lista
+### Finalizar o checklist: todos os exercícios do subtreino (completa) ou só alguns (parcial)
 POST {{baseUrl}}/treinos/1/subtreinos/1/conclusoes
 Content-Type: application/json
 

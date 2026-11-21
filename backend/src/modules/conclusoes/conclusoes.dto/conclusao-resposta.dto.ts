@@ -11,5 +11,9 @@ export class ConclusaoRespostaDto {
   tituloTreino: string;
   tituloSubtreino: string;
   concluidoEm: Date;
+  // Exercícios que o subtreino tinha na conclusão; `completo` é verdadeiro
+  // quando todos foram marcados.
+  totalExercicios: number;
+  completo: boolean;
   exercicios: ExercicioConcluidoRespostaDto[];
 }

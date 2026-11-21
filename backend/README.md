@@ -95,11 +95,11 @@ Configuração no `.env`: `GEMINI_API_KEY` (crie em https://aistudio.google.com/
 
 ## Conclusão de treino (checklist e histórico)
 
-O usuário marca no app os exercícios que fez dentro de um subtreino. Quando **todos** estão marcados, o app chama `POST /treinos/:treinoId/subtreinos/:subtreinoId/conclusoes` com `{ "exerciciosConcluidosIds": [...] }`:
+O usuário marca no app os exercícios que fez dentro de um subtreino e finaliza o checklist (automaticamente ao marcar **todos**, ou manualmente com só **alguns**, o que gera uma conclusão **parcial**). O app chama `POST /treinos/:treinoId/subtreinos/:subtreinoId/conclusoes` com `{ "exerciciosConcluidosIds": [...] }`:
 
-- Só registra se a lista tiver exatamente todos os exercícios do subtreino (faltando algum ou com id de outro subtreino: 400; subtreino sem exercícios: 400).
-- Grava uma linha em `conclusoes_treino` (data/hora em `concluidoEm`) e uma em `exercicios_concluidos` por exercício, com **cópia** dos títulos do treino/subtreino e do nome e carga de cada exercício. O histórico continua legível mesmo se o treino for editado; se o subtreino for removido, a conclusão permanece com `subtreinoId` nulo.
-- A conclusão pertence ao dono do treino. Pode ser registrada mais de uma vez por dia.
+- A lista precisa ter ao menos um exercício e só ids do subtreino (id de outro subtreino ou subtreino sem exercícios: 400). Ids repetidos contam uma vez.
+- Grava uma linha em `conclusoes_treino` (data/hora em `concluidoEm` e `totalExercicios`, quantos exercícios o subtreino tinha) e uma em `exercicios_concluidos` por exercício **marcado**, com **cópia** dos títulos do treino/subtreino e do nome e carga de cada exercício. O histórico continua legível mesmo se o treino for editado; se o subtreino for removido, a conclusão permanece com `subtreinoId` nulo.
+- A resposta traz `totalExercicios` e `completo` (todos marcados). A conclusão pertence ao dono do treino. Pode ser registrada mais de uma vez por dia.
 
 `GET /conclusoes?inicio=&fim=&usuarioId=` lista o histórico (mais recente primeiro, até 200): `inicio` inclusivo e `fim` exclusivo, em ISO 8601; `usuarioId` só vale para administrador/treinador da mesma conta. É a base do calendário semanal do dashboard.
 

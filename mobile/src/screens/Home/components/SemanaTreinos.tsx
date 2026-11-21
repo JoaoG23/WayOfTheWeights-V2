@@ -90,7 +90,7 @@ export const SemanaTreinos = () => {
                 conclusoesDia.map((conclusao) => (
                   <View key={conclusao.id} style={styles.conclusao}>
                     <MaterialCommunityIcons
-                      name="check-circle"
+                      name={conclusao.completo ? "check-circle" : "progress-check"}
                       size={22}
                       color={cores.destaque}
                     />
@@ -100,6 +100,11 @@ export const SemanaTreinos = () => {
                         {conclusao.tituloSubtreino} • {formatarData(conclusao.concluidoEm)} às{" "}
                         {formatarHora(conclusao.concluidoEm)}
                       </Text>
+                      {!conclusao.completo && (
+                        <Text style={styles.parcial}>
+                          Parcial: {conclusao.exercicios.length} de {conclusao.totalExercicios} exercícios
+                        </Text>
+                      )}
                     </View>
                   </View>
                 ))
@@ -146,5 +151,6 @@ const styles = StyleSheet.create({
   conclusao: { flexDirection: "row", alignItems: "center", gap: 8 },
   textosConclusao: { flex: 1, gap: 2 },
   nomeTreino: { fontSize: 15, fontWeight: "bold", color: cores.texto },
+  parcial: { fontSize: 12, fontWeight: "600", color: cores.ciano },
   detalheConclusao: { fontSize: 13, color: cores.textoSecundario },
 });

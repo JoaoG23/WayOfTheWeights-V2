@@ -6,6 +6,7 @@ export type DadosCriarConclusao = {
   subtreinoId: number;
   tituloTreino: string;
   tituloSubtreino: string;
+  totalExercicios: number;
   exercicios: { nome: string; cargaKg: number }[];
 };
 
@@ -37,6 +38,7 @@ export class ConclusoesRepositories {
         subtreinoId: dados.subtreinoId,
         tituloTreino: dados.tituloTreino,
         tituloSubtreino: dados.tituloSubtreino,
+        totalExercicios: dados.totalExercicios,
         exercicios: { create: dados.exercicios },
       },
       include: INCLUIR_EXERCICIOS,

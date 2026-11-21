@@ -1,10 +1,18 @@
 import { useCallback, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
 
+import { Button } from "../../../components/Button";
 import { ButtonFloating } from "../../../components/ButtonFloating";
 import { DecoracaoFundo } from "../../../components/DecoracaoFundo";
 import { Carregando, MensagemTela } from "../../../components/Feedback";
@@ -52,12 +60,14 @@ export const SubtrainingDetail = () => {
   const { mutate: concluirTreino, isPending: concluindo } = useMutation({
     mutationFn: (exerciciosConcluidosIds: number[]) =>
       registrarConclusao(treinoId, id, exerciciosConcluidosIds),
-    onSuccess: () => {
+    onSuccess: (conclusao) => {
       queryClient.invalidateQueries({ queryKey: CHAVE_CONCLUSOES });
       Toast.show({
         type: "success",
-        text1: "Treino concluído!",
-        text2: `${tituloSubtreino} registrado no seu histórico.`,
+        text1: conclusao.completo ? "Treino concluído!" : "Treino parcial registrado!",
+        text2: conclusao.completo
+          ? `${tituloSubtreino} registrado no seu histórico.`
+          : `${conclusao.exercicios.length} de ${conclusao.totalExercicios} exercícios de ${tituloSubtreino}.`,
       });
       encerrarChecklist();
     },
@@ -172,10 +182,22 @@ export const SubtrainingDetail = () => {
       </View>
 
       {treinando && (
-        <Text style={styles.progressoChecklist}>
-          Treino em andamento: {exerciciosMarcados.length}/{exercicios.length}{" "}
-          exercícios. Marque todos para concluir.
-        </Text>
+        <View style={styles.checklist}>
+          <Text style={styles.progressoChecklist}>
+            Treino em andamento: {exerciciosMarcados.length}/{exercicios.length}{" "}
+            exercícios. Marque todos para concluir ou finalize só com os que fez.
+          </Text>
+          {exerciciosMarcados.length > 0 &&
+            exerciciosMarcados.length < exercicios.length &&
+            (concluindo ? (
+              <ActivityIndicator color={cores.destaque} />
+            ) : (
+              <Button
+                title={`Finalizar com ${exerciciosMarcados.length} de ${exercicios.length}`}
+                onPress={() => concluirTreino(exerciciosMarcados)}
+              />
+            ))}
+        </View>
       )}
 
       {renderizarExercicios()}
@@ -201,12 +223,11 @@ const styles = StyleSheet.create({
   textosCabecalho: { flex: 1, gap: 4 },
   titulo: { fontSize: 22, fontWeight: "bold", color: cores.texto },
   descricao: { fontSize: 14, color: cores.textoSecundario },
+  checklist: { paddingHorizontal: 16, paddingBottom: 12, gap: 10 },
   progressoChecklist: {
     fontSize: 14,
     fontWeight: "600",
     color: cores.destaque,
-    paddingHorizontal: 16,
-    paddingBottom: 12,
   },
   acoes: { flexDirection: "row", gap: 18, paddingTop: 4 },
   lista: { paddingHorizontal: 16, paddingBottom: 100 },

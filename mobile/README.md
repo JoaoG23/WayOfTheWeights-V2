@@ -32,7 +32,7 @@ O login grava o cookie httpOnly `jwt` (definido pelo backend). O networking nati
 
 ## Checklist de treino e calendário semanal
 
-No detalhe do subtreino, o ícone verde de checklist inicia o treino: cada toque num exercício o marca ou desmarca. Quando **todos** os exercícios estão marcados, o app registra a conclusão (`POST /treinos/:id/subtreinos/:id/conclusoes`), avisa "Treino concluído!" e sai do modo checklist. Se o app for fechado antes de marcar todos, a marcação parcial é perdida (nada é salvo até concluir).
+No detalhe do subtreino, o ícone verde de checklist inicia o treino: cada toque num exercício o marca ou desmarca. Quando **todos** os exercícios estão marcados, o app registra a conclusão (`POST /treinos/:id/subtreinos/:id/conclusoes`), avisa "Treino concluído!" e sai do modo checklist. Também dá para finalizar **parcialmente**: com ao menos um exercício marcado aparece o botão "Finalizar com X de Y", e só os marcados entram no histórico (aparece como "Parcial" no calendário). Se o app for fechado antes de marcar todos, a marcação parcial é perdida (nada é salvo até concluir).
 
 O dashboard (aba Dashboard) mostra os **treinos da semana** em formato de calendário: cada dia (segunda a domingo) lista os treinos concluídos, com o nome do treino, o subtreino e a data/hora. As setas navegam entre semanas (até a semana atual); os dados vêm de `GET /conclusoes`.
 

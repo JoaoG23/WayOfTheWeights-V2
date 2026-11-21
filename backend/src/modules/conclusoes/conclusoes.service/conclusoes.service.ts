@@ -15,6 +15,7 @@ type ConclusaoComExercicios = {
   subtreinoId: number | null;
   tituloTreino: string;
   tituloSubtreino: string;
+  totalExercicios: number;
   concluidoEm: Date;
   exercicios: { nome: string; cargaKg: number }[];
 };
@@ -28,8 +29,8 @@ export class ConclusoesService {
     private readonly exerciciosService: ExerciciosService,
   ) {}
 
-  // Registra a conclusão só quando TODOS os exercícios do subtreino foram
-  // marcados. A conclusão pertence ao dono do treino.
+  // Registra a conclusão com os exercícios marcados: todos os do subtreino
+  // (completa) ou só alguns (parcial). Pertence ao dono do treino.
   async criar(
     usuarioAutenticado: PayloadJwt,
     treinoId: number,
@@ -50,9 +51,12 @@ export class ConclusoesService {
       treinoId,
       subtreinoId,
     );
-    this.validarTodosExerciciosMarcados(
+    const idsMarcados = this.validarExerciciosMarcados(
       exercicios.map((exercicio) => exercicio.id),
       dadosConclusao.exerciciosConcluidosIds,
+    );
+    const exerciciosMarcados = exercicios.filter((exercicio) =>
+      idsMarcados.has(exercicio.id),
     );
 
     const conclusaoCriada = await this.conclusoesRepositories.criar({
@@ -60,7 +64,8 @@ export class ConclusoesService {
       subtreinoId,
       tituloTreino: treino.titulo,
       tituloSubtreino: subtreino.titulo,
-      exercicios: exercicios.map((exercicio) => ({
+      totalExercicios: exercicios.length,
+      exercicios: exerciciosMarcados.map((exercicio) => ({
         nome: exercicio.nome,
         cargaKg: exercicio.cargaAtual,
       })),
@@ -88,30 +93,26 @@ export class ConclusoesService {
     return conclusoes.map((conclusao) => this.paraResposta(conclusao));
   }
 
-  private validarTodosExerciciosMarcados(
+  // Os ids marcados precisam ser exercícios do subtreino; devolve-os sem
+  // repetição.
+  private validarExerciciosMarcados(
     idsDoSubtreino: number[],
     idsMarcados: number[],
-  ) {
+  ): Set<number> {
     if (idsDoSubtreino.length === 0) {
       throw new BadRequestException('Este subtreino não tem exercícios');
     }
 
     const marcados = new Set(idsMarcados);
-    const idsDesconhecidos = [...marcados].filter(
+    const temIdDesconhecido = [...marcados].some(
       (id) => !idsDoSubtreino.includes(id),
     );
-    if (idsDesconhecidos.length > 0) {
+    if (temIdDesconhecido) {
       throw new BadRequestException(
         'A lista contém exercícios que não são deste subtreino',
       );
     }
-
-    const faltantes = idsDoSubtreino.filter((id) => !marcados.has(id));
-    if (faltantes.length > 0) {
-      throw new BadRequestException(
-        `Marque todos os exercícios para concluir o treino (faltam ${faltantes.length})`,
-      );
-    }
+    return marcados;
   }
 
   // Mantém o contrato da API: a carga sai como cargaAtual (kg), como nos
@@ -126,6 +127,8 @@ export class ConclusoesService {
       tituloTreino: conclusao.tituloTreino,
       tituloSubtreino: conclusao.tituloSubtreino,
       concluidoEm: conclusao.concluidoEm,
+      totalExercicios: conclusao.totalExercicios,
+      completo: conclusao.exercicios.length === conclusao.totalExercicios,
       exercicios: conclusao.exercicios.map((exercicio) => ({
         nome: exercicio.nome,
         cargaAtual: exercicio.cargaKg,

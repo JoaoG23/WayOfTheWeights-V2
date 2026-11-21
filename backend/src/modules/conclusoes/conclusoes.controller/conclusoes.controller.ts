@@ -17,8 +17,7 @@ import { PayloadJwt } from '../../auth/tipos/payload-jwt';
 export class ConclusoesController {
   constructor(private readonly conclusoesService: ConclusoesService) {}
 
-  // Checklist concluído: o treino é registrado se todos os exercícios do
-  // subtreino foram marcados.
+  // Finaliza o checklist: registra os exercícios marcados (todos ou só alguns).
   @Post('treinos/:treinoId/subtreinos/:subtreinoId/conclusoes')
   async criar(
     @UsuarioAutenticado() usuarioAutenticado: PayloadJwt,

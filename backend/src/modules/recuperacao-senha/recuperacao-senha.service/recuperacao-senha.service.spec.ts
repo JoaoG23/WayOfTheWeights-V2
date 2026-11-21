@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 
 import { RecuperacaoSenhaService } from './recuperacao-senha.service';
 import { RecuperacaoSenhaRepositories } from '../recuperacao-senha.repositories/recuperacao-senha.repositories';
@@ -113,7 +113,11 @@ describe('RecuperacaoSenhaService', () => {
       expect(emailService.enviarCodigoRecuperacaoSenha).not.toHaveBeenCalled();
     });
 
-    it('não propaga a falha do servidor SMTP', async () => {
+    it('não propaga a falha do servidor SMTP (só registra no log)', async () => {
+      // O log de erro é esperado neste cenário: mockado para não poluir a saída dos testes.
+      const erroDoLog = jest
+        .spyOn(Logger.prototype, 'error')
+        .mockImplementation(() => undefined);
       emailService.enviarCodigoRecuperacaoSenha!.mockRejectedValue(
         new Error('SMTP indisponível'),
       );
@@ -121,6 +125,9 @@ describe('RecuperacaoSenhaService', () => {
       await expect(
         service.solicitarCodigo({ email: usuarioBase.email }),
       ).resolves.toBeUndefined();
+      expect(erroDoLog).toHaveBeenCalledTimes(1);
+
+      erroDoLog.mockRestore();
     });
   });
 
