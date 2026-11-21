@@ -239,6 +239,21 @@ Content-Type: application/json
 DELETE {{baseUrl}}/treinos/1/subtreinos/1/exercicios/1/series/1
 
 ### ---------------------------------------------------------------------
+### Conclusão de treino (checklist) e histórico
+### ---------------------------------------------------------------------
+
+### Concluir o subtreino: só registra se TODOS os exercícios do subtreino estiverem na lista
+POST {{baseUrl}}/treinos/1/subtreinos/1/conclusoes
+Content-Type: application/json
+
+{
+  "exerciciosConcluidosIds": [1, 2, 3]
+}
+
+### Histórico de treinos concluídos (inicio inclusivo, fim exclusivo; administrador/treinador: &usuarioId=)
+GET {{baseUrl}}/conclusoes?inicio=2026-11-02T00:00:00.000Z&fim=2026-11-09T00:00:00.000Z
+
+### ---------------------------------------------------------------------
 ### Estatísticas
 ### ---------------------------------------------------------------------
 

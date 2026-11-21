@@ -1,8 +1,9 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Toast from "react-native-toast-message";
 
 import { ButtonFloating } from "../../../components/ButtonFloating";
 import { DecoracaoFundo } from "../../../components/DecoracaoFundo";
@@ -11,6 +12,8 @@ import { ExerciseItem } from "../../Exercises/ExerciseItem";
 import { listarExerciciosDoSubtreino } from "../../Exercises/api";
 import { Exercicio } from "../../Exercises/types/exerciciosTypes";
 import { buscarSubtreino } from "../api";
+import { CHAVE_CONCLUSOES, registrarConclusao } from "../../Conclusoes/api";
+import { obterMensagemErro } from "../../../helpers/obterMensagemErro/obterMensagemErro";
 import { cores } from "../../../theme/cores";
 import type { TNavigationScreenProps, TScreenDefinition } from "../../../Routes";
 
@@ -35,6 +38,52 @@ export const SubtrainingDetail = () => {
 
   const tituloSubtreino = subtreino?.titulo ?? titulo;
 
+  // Checklist do treino: o treino só conclui quando todos os exercícios
+  // estão marcados.
+  const queryClient = useQueryClient();
+  const [treinando, setTreinando] = useState(false);
+  const [exerciciosMarcados, setExerciciosMarcados] = useState<number[]>([]);
+
+  const encerrarChecklist = () => {
+    setTreinando(false);
+    setExerciciosMarcados([]);
+  };
+
+  const { mutate: concluirTreino, isPending: concluindo } = useMutation({
+    mutationFn: (exerciciosConcluidosIds: number[]) =>
+      registrarConclusao(treinoId, id, exerciciosConcluidosIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CHAVE_CONCLUSOES });
+      Toast.show({
+        type: "success",
+        text1: "Treino concluído!",
+        text2: `${tituloSubtreino} registrado no seu histórico.`,
+      });
+      encerrarChecklist();
+    },
+    onError: (erro) => {
+      Toast.show({
+        type: "error",
+        text1: "Não foi possível concluir o treino",
+        text2: obterMensagemErro(erro, "Tente novamente"),
+      });
+    },
+  });
+
+  const alternarExercicio = useCallback(
+    (exercicioId: number) => {
+      if (concluindo) return;
+      const marcadosAtualizados = exerciciosMarcados.includes(exercicioId)
+        ? exerciciosMarcados.filter((marcadoId) => marcadoId !== exercicioId)
+        : [...exerciciosMarcados, exercicioId];
+      setExerciciosMarcados(marcadosAtualizados);
+      if (marcadosAtualizados.length === exercicios.length) {
+        concluirTreino(marcadosAtualizados);
+      }
+    },
+    [concluindo, exerciciosMarcados, exercicios.length, concluirTreino]
+  );
+
   const renderItem = useCallback(
     ({ item }: { item: Exercicio }) => (
       <ExerciseItem
@@ -44,9 +93,11 @@ export const SubtrainingDetail = () => {
         nome={item.nome}
         cargaAtual={item.cargaAtual}
         repeticoesPorSerie={item.repeticoesPorSerie}
+        marcado={exerciciosMarcados.includes(item.id)}
+        aoAlternar={treinando ? alternarExercicio : undefined}
       />
     ),
-    [treinoId]
+    [treinoId, treinando, exerciciosMarcados, alternarExercicio]
   );
   const keyExtractor = useCallback((item: Exercicio) => item.id.toString(), []);
 
@@ -63,6 +114,7 @@ export const SubtrainingDetail = () => {
         data={exercicios}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
+        extraData={exerciciosMarcados}
         contentContainerStyle={styles.lista}
       />
     );
@@ -79,6 +131,17 @@ export const SubtrainingDetail = () => {
           ) : null}
         </View>
         <View style={styles.acoes}>
+          {exercicios.length > 0 && (
+            <TouchableOpacity
+              onPress={treinando ? encerrarChecklist : () => setTreinando(true)}
+            >
+              <Feather
+                name={treinando ? "x-square" : "check-square"}
+                size={22}
+                color={cores.sucesso}
+              />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             onPress={() =>
               navigation.navigate("ImportSubtraining", {
@@ -108,12 +171,21 @@ export const SubtrainingDetail = () => {
         </View>
       </View>
 
+      {treinando && (
+        <Text style={styles.progressoChecklist}>
+          Treino em andamento: {exerciciosMarcados.length}/{exercicios.length}{" "}
+          exercícios. Marque todos para concluir.
+        </Text>
+      )}
+
       {renderizarExercicios()}
-      <ButtonFloating
-        onPress={() =>
-          navigation.navigate("AddExercise", { treinoId, subtreinoId: id })
-        }
-      />
+      {!treinando && (
+        <ButtonFloating
+          onPress={() =>
+            navigation.navigate("AddExercise", { treinoId, subtreinoId: id })
+          }
+        />
+      )}
     </View>
   );
 };
@@ -129,6 +201,13 @@ const styles = StyleSheet.create({
   textosCabecalho: { flex: 1, gap: 4 },
   titulo: { fontSize: 22, fontWeight: "bold", color: cores.texto },
   descricao: { fontSize: 14, color: cores.textoSecundario },
+  progressoChecklist: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: cores.sucesso,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+  },
   acoes: { flexDirection: "row", gap: 18, paddingTop: 4 },
   lista: { paddingHorizontal: 16, paddingBottom: 100 },
 });

@@ -19,6 +19,10 @@ interface ExerciseItemProps {
   subtitulo?: string;
   // Repetições de cada série; quando informado, mostra o resumo das séries.
   repeticoesPorSerie?: number[];
+  // Modo checklist (treino em andamento): o toque marca/desmarca o exercício
+  // em vez de abrir o detalhe.
+  marcado?: boolean;
+  aoAlternar?: (exercicioId: number) => void;
 }
 
 export const ExerciseItem = React.memo(
@@ -30,6 +34,8 @@ export const ExerciseItem = React.memo(
     cargaAtual,
     subtitulo,
     repeticoesPorSerie,
+    marcado = false,
+    aoAlternar,
   }: ExerciseItemProps) => {
     const navigation = useNavigation<TNavigationScreenProps>();
 
@@ -37,13 +43,23 @@ export const ExerciseItem = React.memo(
       <Card
         style={styles.card}
         onPress={() =>
-          navigation.navigate("ExerciseDetail", {
-            treinoId,
-            subtreinoId,
-            id: exercicioId,
-          })
+          aoAlternar
+            ? aoAlternar(exercicioId)
+            : navigation.navigate("ExerciseDetail", {
+                treinoId,
+                subtreinoId,
+                id: exercicioId,
+              })
         }
       >
+        {aoAlternar && (
+          <MaterialCommunityIcons
+            name={marcado ? "checkbox-marked-circle" : "checkbox-blank-circle-outline"}
+            size={28}
+            color={marcado ? cores.sucesso : cores.neutro}
+            style={styles.checkbox}
+          />
+        )}
         <View style={styles.info}>
           <Text style={styles.nome}>{nome}</Text>
           {subtitulo && <Text style={styles.subtitulo}>{subtitulo}</Text>}
@@ -66,6 +82,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
+  checkbox: { marginRight: 12 },
   info: { flex: 1, gap: 6 },
   nome: { fontSize: 17, fontWeight: "bold", color: cores.texto },
   subtitulo: { fontSize: 13, color: cores.textoSecundario },

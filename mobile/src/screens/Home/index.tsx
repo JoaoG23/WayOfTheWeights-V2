@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card } from "../../components/Card";
 import { Carregando } from "../../components/Feedback";
 import { DecoracaoFundo } from "../../components/DecoracaoFundo";
+import { SemanaTreinos } from "./components/SemanaTreinos";
 import { useAuth } from "../../contexts/AuthContext";
 import { formatarCarga } from "../../helpers/formatarCarga/formatarCarga";
 import { listarTreinos } from "../Trainings/api";
@@ -53,6 +54,8 @@ export const Home = () => {
           <Text style={styles.saudacao}>Olá, {primeiroNome}</Text>
           <Text style={styles.saudacao}>Veja se ficou mais forte</Text>
         </View>
+
+        <SemanaTreinos />
 
         {!maiorEvolucao ? (
           <Card

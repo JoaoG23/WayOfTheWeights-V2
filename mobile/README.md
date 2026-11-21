@@ -17,7 +17,8 @@ src/
 ├── theme/cores.ts            # paleta do app
 └── screens/
     ├── Auth/                 # Login (com biometria), SignUp, recuperação de senha por código
-    ├── Home/                 # aba Dashboard: saudação e destaques de evolução
+    ├── Home/                 # aba Dashboard: calendário semanal de treinos concluídos e destaques de evolução
+    ├── Conclusoes/           # api do checklist de conclusão e do histórico de treinos
     ├── Trainings/            # lista, detalhe (mostra os subtreinos), criar, editar, remover treino
     ├── Subtrainings/         # até 3 por treino: detalhe (exercícios), criar, editar, remover, importar por imagens
     ├── Exercises/            # todos os exercícios, criar, detalhe (carga, séries, gráfico), remover
@@ -28,6 +29,12 @@ src/
 ## Sessão
 
 O login grava o cookie httpOnly `jwt` (definido pelo backend). O networking nativo do Android e do iOS guarda esse cookie e o reenvia sozinho, então o app nunca manipula o token. Ao abrir, o app chama `GET /conta` para restaurar a sessão; qualquer resposta 401 volta para o login.
+
+## Checklist de treino e calendário semanal
+
+No detalhe do subtreino, o ícone verde de checklist inicia o treino: cada toque num exercício o marca ou desmarca. Quando **todos** os exercícios estão marcados, o app registra a conclusão (`POST /treinos/:id/subtreinos/:id/conclusoes`), avisa "Treino concluído!" e sai do modo checklist. Se o app for fechado antes de marcar todos, a marcação parcial é perdida (nada é salvo até concluir).
+
+O dashboard (aba Dashboard) mostra os **treinos da semana** em formato de calendário: cada dia (segunda a domingo) lista os treinos concluídos, com o nome do treino, o subtreino e a data/hora. As setas navegam entre semanas (até a semana atual); os dados vêm de `GET /conclusoes`.
 
 ## Importar subtreino por imagens (OCR)
 

@@ -70,6 +70,7 @@ model Usuario {
   atualizadoEm DateTime      @updatedAt @map("atualizado_em")
 
   treinos                Treino[]
+  conclusoesTreino       ConclusaoTreino[]
   codigoRecuperacaoSenha CodigoRecuperacaoSenha?
 
   @@index([contaId, perfil])
@@ -129,7 +130,8 @@ model Subtreino {
   criadoEm     DateTime @default(now()) @map("criado_em")
   atualizadoEm DateTime @updatedAt @map("atualizado_em")
 
-  exercicios Exercicio[]
+  exercicios  Exercicio[]
+  conclusoes  ConclusaoTreino[]
 
   @@index([treinoId])
   @@map("subtreinos")
@@ -196,4 +198,37 @@ model HistoricoCarga {
 
   @@index([exercicioId, registradoEm])
   @@map("historico_cargas")
+}
+
+// Histórico de treinos realizados: um registro por vez que o usuário marcou
+// todos os exercícios de um subtreino. Guarda cópias dos títulos e dos
+// exercícios, para o histórico continuar legível mesmo se o treino mudar.
+model ConclusaoTreino {
+  id              Int       @id @default(autoincrement())
+  usuarioId       Int       @map("usuario_id")
+  usuario         Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  // Vira nulo se o subtreino for removido; o histórico permanece.
+  subtreinoId     Int?      @map("subtreino_id")
+  subtreino       Subtreino? @relation(fields: [subtreinoId], references: [id], onDelete: SetNull)
+  tituloTreino    String    @map("titulo_treino")
+  tituloSubtreino String    @map("titulo_subtreino")
+  concluidoEm     DateTime  @default(now()) @map("concluido_em")
+
+  exercicios ExercicioConcluido[]
+
+  @@index([usuarioId, concluidoEm])
+  @@index([subtreinoId])
+  @@map("conclusoes_treino")
+}
+
+// Exercício marcado numa conclusão, com a carga (kg) no dia.
+model ExercicioConcluido {
+  id          Int             @id @default(autoincrement())
+  conclusaoId Int             @map("conclusao_id")
+  conclusao   ConclusaoTreino @relation(fields: [conclusaoId], references: [id], onDelete: Cascade)
+  nome        String
+  cargaKg     Int             @map("carga_kg")
+
+  @@index([conclusaoId])
+  @@map("exercicios_concluidos")
 }

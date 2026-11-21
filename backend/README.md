@@ -20,6 +20,7 @@ src/
     ├── treinos/             # /treinos
     ├── subtreinos/          # /treinos/:treinoId/subtreinos (até 3 por treino)
     ├── importacao-subtreinos/ # /treinos/:treinoId/subtreinos/ocr e /:id/importar (leitura de imagens com Gemini + upsert)
+    ├── conclusoes/          # /treinos/:treinoId/subtreinos/:subtreinoId/conclusoes e /conclusoes (checklist e histórico)
     ├── exercicios/          # /treinos/:treinoId/subtreinos/:subtreinoId/exercicios (+ /historico)
     ├── series/              # /treinos/:treinoId/subtreinos/:subtreinoId/exercicios/:exercicioId/series
     └── estatisticas/        # /estatisticas/resumo
@@ -91,6 +92,16 @@ Regras do upsert:
 - Limites: carga inteira 1–1500, repetições 1–100, até 20 séries por exercício e 30 exercícios por subtreino.
 
 Configuração no `.env`: `GEMINI_API_KEY` (crie em https://aistudio.google.com/api-keys) e, opcionalmente, `GEMINI_MODEL` (padrão `gemini-3.8-flash`). Se o Gemini responder erro temporário (503/429/5xx), o backend tenta de novo 3 vezes com espera crescente e depois usa `GEMINI_MODEL_CONTINGENCIA` (padrão `gemini-2.5-flash`); esgotado, responde 502. Sem a chave, o OCR responde 503; a importação do JSON funciona normalmente.
+
+## Conclusão de treino (checklist e histórico)
+
+O usuário marca no app os exercícios que fez dentro de um subtreino. Quando **todos** estão marcados, o app chama `POST /treinos/:treinoId/subtreinos/:subtreinoId/conclusoes` com `{ "exerciciosConcluidosIds": [...] }`:
+
+- Só registra se a lista tiver exatamente todos os exercícios do subtreino (faltando algum ou com id de outro subtreino: 400; subtreino sem exercícios: 400).
+- Grava uma linha em `conclusoes_treino` (data/hora em `concluidoEm`) e uma em `exercicios_concluidos` por exercício, com **cópia** dos títulos do treino/subtreino e do nome e carga de cada exercício. O histórico continua legível mesmo se o treino for editado; se o subtreino for removido, a conclusão permanece com `subtreinoId` nulo.
+- A conclusão pertence ao dono do treino. Pode ser registrada mais de uma vez por dia.
+
+`GET /conclusoes?inicio=&fim=&usuarioId=` lista o histórico (mais recente primeiro, até 200): `inicio` inclusivo e `fim` exclusivo, em ISO 8601; `usuarioId` só vale para administrador/treinador da mesma conta. É a base do calendário semanal do dashboard.
 
 ## Regras de negócio
 

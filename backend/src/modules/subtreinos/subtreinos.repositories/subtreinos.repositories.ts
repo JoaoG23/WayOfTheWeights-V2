@@ -27,7 +27,8 @@ export class SubtreinosRepositories {
   async listarPorTreino(treinoId: number) {
     return this.prisma.subtreino.findMany({
       where: { treinoId },
-      orderBy: { id: 'asc' },
+      // Mais recente primeiro; o id desempata subtreinos criados juntos.
+      orderBy: [{ criadoEm: 'desc' }, { id: 'desc' }],
     });
   }
 

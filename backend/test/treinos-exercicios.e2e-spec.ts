@@ -250,10 +250,11 @@ describe('Treinos, exercícios e estatísticas (e2e)', () => {
       const lista = await request(app.getHttpServer())
         .get(`/treinos/${treinoId}/subtreinos`)
         .set('Cookie', cookieAluno);
+      // Mais recente primeiro.
       expect(lista.body.map((subtreino) => subtreino.titulo)).toEqual([
-        'Peito',
-        'Costas',
         'Pernas',
+        'Costas',
+        'Peito',
       ]);
 
       const remocao = await request(app.getHttpServer())

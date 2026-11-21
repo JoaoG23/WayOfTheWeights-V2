@@ -11,6 +11,7 @@ import { SubtreinosModule } from './modules/subtreinos/subtreinos.module';
 import { ImportacaoSubtreinosModule } from './modules/importacao-subtreinos/importacao-subtreinos.module';
 import { ExerciciosModule } from './modules/exercicios/exercicios.module';
 import { SeriesModule } from './modules/series/series.module';
+import { ConclusoesModule } from './modules/conclusoes/conclusoes.module';
 import { EstatisticasModule } from './modules/estatisticas/estatisticas.module';
 
 @Module({
@@ -25,6 +26,7 @@ import { EstatisticasModule } from './modules/estatisticas/estatisticas.module';
     ImportacaoSubtreinosModule,
     ExerciciosModule,
     SeriesModule,
+    ConclusoesModule,
     EstatisticasModule,
   ],
   controllers: [AppController],
