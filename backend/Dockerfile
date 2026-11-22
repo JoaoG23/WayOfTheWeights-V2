@@ -42,8 +42,15 @@ RUN npm ci --omit=dev --ignore-scripts
 # Aplica as migrations no banco e termina (serviço "migrar" do compose).
 FROM deps AS migracao
 ENV NODE_ENV=production
+# O Prisma CLI precisa do OpenSSL (a imagem slim não traz) e do motor de
+# migrations, que o npm ci --ignore-scripts não baixou. Os dois ficam prontos
+# aqui, no build, como root, para o container (usuário "node") só executar.
+RUN apt-get update -y \
+    && apt-get install -y --no-install-recommends openssl \
+    && rm -rf /var/lib/apt/lists/*
 COPY prisma ./prisma
 COPY prisma.config.ts ./
+RUN npm rebuild @prisma/engines && node_modules/.bin/prisma --version
 USER node
 CMD ["node_modules/.bin/prisma", "migrate", "deploy"]
 

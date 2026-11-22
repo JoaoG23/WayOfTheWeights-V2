@@ -1,4 +1,5 @@
-@baseUrl = http://localhost:3000
+@baseUrl = http://152.67.40.98:3001
+# @baseUrl = http://localhost:3000
 # A sessão é mantida pelo cookie httpOnly "jwt" gravado no login: o REST
 # Client (VS Code) guarda e reenvia o cookie sozinho, sem header Authorization.
 
