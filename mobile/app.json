@@ -27,7 +27,12 @@
         "backgroundColor": "#DCFC34"
       },
       "package": "com.joaog.wayoftheweights",
-      "usesCleartextTraffic": true
+      "usesCleartextTraffic": true,
+      "permissions": [
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -57,6 +62,11 @@
           "cameraPermission": "Permite fotografar a ficha de treino e o seu perfil."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "d22ef134-e916-4516-9632-7f5db9e8f744"
+      }
+    }
   }
 }
