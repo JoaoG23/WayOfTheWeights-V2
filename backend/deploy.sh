@@ -13,12 +13,8 @@ else
   COMPOSE="docker-compose"
 fi
 
-# Nome fixo do projeto (o v1 usaria o nome da pasta) e BuildKit só nesta
-# execução: o Dockerfile usa cache de npm, que exige BuildKit. Não altera os
-# outros deploys do servidor.
+# Nome fixo do projeto (o v1 usaria o nome da pasta).
 export COMPOSE_PROJECT_NAME=wayoftheweights
-export DOCKER_BUILDKIT=1
-export COMPOSE_DOCKER_CLI_BUILD=1
 
 if [ "${1:-}" = "--pull" ]; then
   $COMPOSE pull

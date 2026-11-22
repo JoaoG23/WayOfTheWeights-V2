@@ -1,8 +1,7 @@
-# syntax=docker/dockerfile:1.7
-
 # Imagem do backend em estágios, pensada para CI/CD: camadas de dependências
-# só são refeitas quando o package-lock muda, o cache do npm é reaproveitado
-# entre builds (BuildKit) e a imagem final leva só o necessário para rodar.
+# só são refeitas quando o package-lock muda e a imagem final leva só o
+# necessário para rodar. Não exige BuildKit: builda também com o builder
+# clássico (docker-compose v1).
 #
 # Alvos:
 #   runtime   -> API (padrão de produção)
@@ -17,7 +16,7 @@ WORKDIR /app
 # --ignore-scripts: o postinstall (prisma generate) roda explicitamente abaixo.
 FROM base AS deps
 COPY package.json package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts
+RUN npm ci --ignore-scripts
 
 # Desenvolvimento (docker-compose.dev.yml): só as dependências; o código vem
 # do host por volume e roda com hot reload.
@@ -38,7 +37,7 @@ RUN DATABASE_URL="postgresql://usuario:senha@localhost:5432/banco" npx prisma ge
 FROM base AS prod-deps
 ENV NODE_ENV=production
 COPY package.json package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev --ignore-scripts
+RUN npm ci --omit=dev --ignore-scripts
 
 # Aplica as migrations no banco e termina (serviço "migrar" do compose).
 FROM deps AS migracao

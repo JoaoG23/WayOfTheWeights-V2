@@ -161,7 +161,7 @@ chmod +x deploy.sh && ./deploy.sh       # build, migrations e sobe a API
 ```
 
 - **Deploy:** o `deploy.sh` faz build (ou `--pull`), roda as migrations (`run --rm migrar`, que aplica `prisma migrate deploy`) e só então sobe a API. Se a migration falhar, o script para e a API anterior continua no ar.
-- **BuildKit:** o Dockerfile usa cache do npm, que exige BuildKit. O script liga `DOCKER_BUILDKIT` e `COMPOSE_DOCKER_CLI_BUILD` só na própria execução, sem mexer na configuração do servidor. Se você rodar o compose à mão no v1, exporte as duas variáveis antes.
+- **Builder:** o Dockerfile não exige BuildKit, então builda também com o builder clássico do `docker-compose` v1.
 - **Fotos:** `UPLOADS_HOST_DIR` (padrão `./uploads`) é montado em `/app/uploads`. Inclua essa pasta no backup.
 - **Banco no próprio servidor:** use `host.docker.internal` como host na `DATABASE_URL` (o compose já mapeia para o host; precisa do Docker 20.10+, senão use o IP do servidor). Se o banco exigir SSL, acrescente `?sslmode=require`.
 - **Cookie de sessão:** com `NODE_ENV=production` o cookie só funciona em HTTPS. Se o servidor de testes responde em HTTP puro, use `NODE_ENV=development` no `.env.prod`.
@@ -171,16 +171,16 @@ chmod +x deploy.sh && ./deploy.sh       # build, migrations e sobe a API
 **CI/CD** (as variáveis são lidas pelo compose):
 
 ```bash
-# CI: build com cache de camadas e push da imagem versionada pelo commit
+# CI: build e push da imagem versionada pelo commit
 export IMAGEM_BACKEND=registro.exemplo.com/wow/backend TAG_IMAGEM=$GITHUB_SHA COMMIT_SHA=$GITHUB_SHA
-DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker-compose build
+docker-compose build
 docker-compose push
 
 # CD (no servidor): baixa a imagem, migra e sobe sem rebuild
 ./deploy.sh --pull
 ```
 
-Para cache entre execuções do CI, use `docker buildx build --cache-from type=gha --cache-to type=gha,mode=max` no alvo `runtime`.
+Para cache entre execuções do CI, use `docker buildx build --cache-from type=gha --cache-to type=gha,mode=max` no alvo `runtime` (no CI, que tem BuildKit).
 
 ## Testes
 
