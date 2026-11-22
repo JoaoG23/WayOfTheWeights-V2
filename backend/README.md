@@ -164,7 +164,7 @@ chmod +x deploy.sh && ./deploy.sh       # build, migrations e sobe a API
 - **Builder:** o Dockerfile não exige BuildKit, então builda também com o builder clássico do `docker-compose` v1.
 - **Fotos:** `UPLOADS_HOST_DIR` (padrão `./uploads`) é montado em `/app/uploads`. Inclua essa pasta no backup.
 - **Banco no próprio servidor:** use `host.docker.internal` como host na `DATABASE_URL` (o compose já mapeia para o host; precisa do Docker 20.10+, senão use o IP do servidor). Se o banco exigir SSL, acrescente `?sslmode=require`.
-- **Cookie de sessão:** com `NODE_ENV=production` o cookie só funciona em HTTPS. Se o servidor de testes responde em HTTP puro, use `NODE_ENV=development` no `.env.prod`.
+- **Cookie de sessão:** com `NODE_ENV=production` o cookie é `secure` e só funciona em HTTPS. Se o servidor responde em HTTP puro (ex.: `http://IP:3001`), defina `COOKIE_SECURE=false` no `.env.prod`, senão o login não persiste no app. Em HTTP, senha e token trafegam sem criptografia: use HTTPS assim que possível e remova essa variável.
 - **Porta:** a API usa a 3001 por padrão. Para trocar, defina `PORTA` (ex.: `PORTA=3002 ./deploy.sh`, ou num arquivo `.env` ao lado do compose); vale para o container e para a porta publicada. Ajuste também a `EXPO_PUBLIC_API_URL` do app.
 - **Saúde:** a imagem tem `HEALTHCHECK` (GET /); veja com `docker ps`.
 
